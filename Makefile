@@ -15,6 +15,12 @@ SRCS	=	$(addsuffix .cpp,		\
 			)						\
 			$(addprefix init/,		\
 				init				\
+			)						\
+			$(addprefix server/,	\
+				connections			\
+			)						\
+			$(addprefix cleaning/,	\
+				clear_data			\
 			)))
 CLAS	= 	$(addsuffix .cpp,		\
 			$(addprefix classes/,	\
@@ -41,8 +47,7 @@ ${NAME}: ${OBJS}
 all: ${NAME}
 
 test: re 
-	@echo "${CYAN}No automated tests for this one!${NC}"
-	@valgrind ./${NAME}
+	@valgrind --track-fds=yes ./${NAME} 6667 Victor
 	@make fclean
 
 clean:

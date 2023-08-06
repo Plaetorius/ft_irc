@@ -2,7 +2,6 @@
 # define USER_H
 # include "IRC.hpp"
 
-
 class User
 {
 	private:

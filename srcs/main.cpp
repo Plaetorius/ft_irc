@@ -3,17 +3,26 @@
 int main(int argc, char *argv[])
 {
 	int			port; 
-	string	password;
+	std::string	password;
+	t_data		data;
+	int			epoll_fds;
 
 	if (argc != 3)
-	{
-		error_str("ircserver requires 2 arguments. Usage: ./ircserver <PORT> <PASSWORD>");
-		return (EXIT_FAILURE);
-	}
+		return (error_str("ircserver requires 2 arguments. Usage: ./ircserver <PORT> <PASSWORD>"), EXIT_FAILURE);
 	if (!parsing(argv, port, password))
 		return (EXIT_FAILURE);
 	cout << "Port: " << port << endl << "Password: " << password << endl << "Enjoy ;)" << endl;
-	if (!init(port, password))
+	if (!init(port, data))
 		return (EXIT_FAILURE);
+	while (true)
+	{
+		epoll_fds = epoll_wait(data.epoll_fd, data.events, MAX_CONNECTIONS, -1);
+		if (epoll_fds == -1)
+			return (clear_data(data), error_str("epoll_wait() failed"), EXIT_FAILURE);
+		for (int i = 0; i < epoll_fds; i++)
+			server_actions(data, i, port, password);
+		//TODO iterate over every argument, check wether we connect, disconnect or execute a command
+		
+	}
 	return (EXIT_SUCCESS);
 }
