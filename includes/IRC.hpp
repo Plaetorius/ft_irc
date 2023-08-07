@@ -16,20 +16,26 @@
 # include <stdlib.h>
 # include <string.h>
 # include <sys/epoll.h>
-# include "User.hpp"
+
+class User;
 
 using namespace std;
 # define MAX_CONNECTIONS 16
 # define LOCAL_HOST "127.0.0.1"
 
+typedef std::map<int, User*> t_users;
+
 typedef struct s_data
 {
-		int	socket_fd;
-		struct	sockaddr_in serv_addr;
-		int	epoll_fd;
-		epoll_event	socket_event;
-		epoll_event	events[MAX_CONNECTIONS];
-} 		t_data;
+		int					socket_fd;
+		struct sockaddr_in	serv_addr;
+		int					epoll_fd;
+		epoll_event			socket_event;
+		epoll_event			events[MAX_CONNECTIONS];
+		int					port;
+		std::string			password;
+		t_users				users;
+} 							t_data;
 
 
 /******************************************************************************/
@@ -37,7 +43,6 @@ typedef struct s_data
 /*                                  Parsing                                   */
 /*																		      */
 /******************************************************************************/
-
 bool	parsing(char **argv, int &port, string &password);
 
 /******************************************************************************/
@@ -45,7 +50,6 @@ bool	parsing(char **argv, int &port, string &password);
 /*									Error									  */
 /*																		      */
 /******************************************************************************/
-
 bool	error_str(const string error_message);
 
 /******************************************************************************/
@@ -53,7 +57,6 @@ bool	error_str(const string error_message);
 /*									Init									  */
 /*																		      */
 /******************************************************************************/
-
 bool	init(int &port, t_data &data);
 
 /******************************************************************************/
@@ -61,7 +64,7 @@ bool	init(int &port, t_data &data);
 /*                                  Cleaning                                  */
 /*																		      */
 /******************************************************************************/
-void	server_actions(t_data &data, int i, int port, std::string &password);
+void	server_actions(t_data &data, int i);
 
 /******************************************************************************/
 /*																		      */
@@ -69,6 +72,13 @@ void	server_actions(t_data &data, int i, int port, std::string &password);
 /*																		      */
 /******************************************************************************/
 void	clear_data(t_data &data);
+
+/******************************************************************************/
+/*																		      */
+/*                                  Utils		                              */
+/*																		      */
+/******************************************************************************/
+int	find_id(int fd, t_data &data);
 
 
 #endif

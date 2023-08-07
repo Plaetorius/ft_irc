@@ -21,6 +21,9 @@ SRCS	=	$(addsuffix .cpp,		\
 			)						\
 			$(addprefix cleaning/,	\
 				clear_data			\
+			)						\
+			$(addprefix utils/,		\
+				find_id				\
 			)))
 CLAS	= 	$(addsuffix .cpp,		\
 			$(addprefix classes/,	\

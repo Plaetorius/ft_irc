@@ -5,7 +5,7 @@ bool	init(int &port, t_data &data)
 	data.socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (data.socket_fd < 0)
 		return error_str("couldn't open socket");
-	memset(&data.serv_addr, '0', sizeof(data.serv_addr));
+	memset(&data.serv_addr, '0', sizeof(data.serv_addr)); //TODO maybe consider a cpp alternative
 	data.serv_addr.sin_family = AF_INET;
 	data.serv_addr.sin_port = htons(port);
 	data.serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);

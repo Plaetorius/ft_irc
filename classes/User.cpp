@@ -1,5 +1,4 @@
 #include "User.hpp"
-#include <iostream>
 
 User::User()
 {
@@ -25,3 +24,15 @@ User::~User()
 {
 	cout << "User destructor called" << endl;
 }
+
+
+/*
+				GETTERS
+*/
+int	User::get_fd(void) {return this->_fd;};
+int User::get_id(void) {return this->_id;};
+
+
+//TODO remove ; for debug
+void User::set_id(int id) {this->_id = id;};
+void User::set_fd(int fd) {this->_fd = fd;};
