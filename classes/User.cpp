@@ -25,6 +25,9 @@ User::~User()
 	cout << "User destructor called" << endl;
 }
 
+User::User(int fd, int id) : _id(id), _fd(fd) {}
+
+
 
 /*
 				GETTERS

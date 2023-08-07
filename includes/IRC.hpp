@@ -16,6 +16,7 @@
 # include <stdlib.h>
 # include <string.h>
 # include <sys/epoll.h>
+# include <fcntl.h>
 
 class User;
 
@@ -35,6 +36,7 @@ typedef struct s_data
 		int					port;
 		std::string			password;
 		t_users				users;
+		vector<int>			open_fds;
 } 							t_data;
 
 
@@ -72,6 +74,7 @@ void	server_actions(t_data &data, int i);
 /*																		      */
 /******************************************************************************/
 void	clear_data(t_data &data);
+void	clear_data_exit(t_data &data, std::string err_message, int err_code);
 
 /******************************************************************************/
 /*																		      */

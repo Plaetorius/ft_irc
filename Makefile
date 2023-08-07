@@ -17,7 +17,7 @@ SRCS	=	$(addsuffix .cpp,		\
 				init				\
 			)						\
 			$(addprefix server/,	\
-				connections			\
+				actions				\
 			)						\
 			$(addprefix cleaning/,	\
 				clear_data			\

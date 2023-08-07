@@ -16,6 +16,8 @@ class User
 		User& operator=(const User &rhs);
 		~User();
 
+		User(int fd, int id);
+
 		int	get_id();
 		int	get_fd();
 
