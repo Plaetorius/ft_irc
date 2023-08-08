@@ -27,6 +27,9 @@ using namespace std;
 
 typedef std::map<int, User*> t_users;
 
+
+
+
 typedef struct s_data
 {
 		int					socket_fd;

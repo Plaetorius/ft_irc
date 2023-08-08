@@ -20,13 +20,9 @@ User& User::operator=(const User &rhs)
 	return (*this);
 }
 
-User::~User()
-{
-	cout << "User destructor called" << endl;
-}
+User::~User() {}
 
 User::User(int fd, int id) : _id(id), _fd(fd) {}
-
 
 
 /*

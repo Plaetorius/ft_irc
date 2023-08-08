@@ -13,13 +13,6 @@ int main(int argc, char *argv[])
 	t_data		data;
 	int			epoll_fds;
 
-
-
-	data.users[0] = new User();
-	data.users[0]->set_fd(3);
-	data.users[0]->set_id(0);
-	cout << find_id(3, data) << endl;
-
 	if (argc != 3)
 		return (error_str("ircserver requires 2 arguments. Usage: ./ircserver <PORT> <PASSWORD>"), EXIT_FAILURE);
 	if (!parsing(argv, port, password))
@@ -33,9 +26,7 @@ int main(int argc, char *argv[])
 		if (epoll_fds < 0)
 			return (clear_data(data), error_str("epoll_wait() failed"), EXIT_FAILURE);
 		for (int i = 0; i < epoll_fds; i++)
-			server_actions(data, i);
-		//TODO iterate over every argument, check wether we connect, disconnect or execute a command
-		
+			server_actions(data, i);		
 	}
 	return (EXIT_SUCCESS);
 }

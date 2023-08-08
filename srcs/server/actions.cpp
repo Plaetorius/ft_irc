@@ -13,10 +13,10 @@ static void	user_connection(t_data &data)
 	size_socket_new_con = sizeof(socket_new_con);
 	socket_new_con = sockaddr_in();
 	epoll_event_new_con = epoll_event();
-	fd_new_con = accept(data.socket_fd, (sockaddr *)&socket_new_con, &size_socket_new_con);
+	fd_new_con = accept(data.socket_fd, (struct sockaddr *)&socket_new_con, &size_socket_new_con);
 	if (fd_new_con < 0)
 		clear_data_exit(data, "accept() failed", 1);
-	new_user = new User(user_id, fd_new_con);
+	new_user = new User(fd_new_con, user_id);
 	data.users.insert(make_pair<int, User *>(user_id, new_user));
 	data.open_fds.push_back(fd_new_con);
 	epoll_event_new_con.events = EPOLLIN | EPOLLRDHUP;
@@ -24,7 +24,7 @@ static void	user_connection(t_data &data)
 	fcntl(fd_new_con, F_SETFL, O_NONBLOCK); //Imposed by the subject
 	if (epoll_ctl(data.epoll_fd, EPOLL_CTL_ADD, fd_new_con, &epoll_event_new_con) < 0)
 		clear_data_exit(data, "epoll_ctl() failed", 1);
-	cout << "User " << user_id++ << " connected" << endl;
+	cout << "User " << user_id++ << " connected :)" << endl;
 }
 
 static void	user_disconnection(t_data &data, int fd)
@@ -58,28 +58,13 @@ static void	user_disconnection(t_data &data, int fd)
 			break;
 		}
 	}
-	cout << "User " << id_disc_user << " disconnected." << endl;
-}
-
-
-string	read_connection_data(int fd_user) {
-	char				buff[READ_SIZE + 1];
-	int					bytes_read;
-	string				res;	
-
-	
-	bzero(buff, READ_SIZE + 1);
-	bytes_read = read(fd_user, buff, READ_SIZE);
-	return res;
+	cout << "User " << id_disc_user << " disconnected :(" << endl;
 }
 
 static void	user_command(int id_user, t_data &data)
 {
 	static map<int, string>		command;
-	
-	command[id_user].append(read_connection_data(data.users[id_user]->get_fd()));
 
-	return ;
 }
 
 /*
@@ -95,8 +80,6 @@ static void	user_command(int id_user, t_data &data)
 void	server_actions(t_data &data, int i)
 {
 	int user_id = find_id(data.events[i].data.fd, data);
-	cout << "User ID " << user_id << endl;
-	cout << "data.events[i].data.fd " << data.events[i].data.fd << " data.socket_fd " << data.socket_fd << endl;
 
 	if (data.events[i].data.fd == data.socket_fd)			//Check if the user 
 		user_connection(data);								//Connect a user
