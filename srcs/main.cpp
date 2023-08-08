@@ -19,6 +19,8 @@ int main(int argc, char *argv[])
 	int					epoll_fds;
 	struct sigaction	sa;
 
+
+	data.open_fds = new vector<int>;
 	if (argc != 3)
 		return (error_str("ircserver requires 2 arguments. Usage: ./ircserver <PORT> <PASSWORD>"), EXIT_FAILURE);
 	if (!parsing(argv, data.port, data.password))

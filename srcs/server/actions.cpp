@@ -18,7 +18,9 @@ static void	user_connection(t_data &data)
 		clear_data_exit(data, "accept() failed", 1);
 	new_user = new User(fd_new_con, user_id);
 	data.users.insert(make_pair<int, User *>(user_id, new_user));
-	data.open_fds.push_back(fd_new_con);
+	cout << "fd new con " << fd_new_con << endl;
+	data.open_fds->push_back(fd_new_con);
+	cout << "length after push " << data.open_fds->size() << endl;
 	epoll_event_new_con.events = EPOLLIN | EPOLLRDHUP;
 	epoll_event_new_con.data.fd = fd_new_con;
 	fcntl(fd_new_con, F_SETFL, O_NONBLOCK); //Imposed by the subject
@@ -48,13 +50,13 @@ static void	user_disconnection(t_data &data, int fd)
 	}
 	data.users.erase(id_disc_user);
 	delete disc_user;
-	it = data.open_fds.begin();
-	ite = data.open_fds.end();
+	it = data.open_fds->begin();
+	ite = data.open_fds->end();
 	for (; it != ite; it++)
 	{
 		if (*it == fd)
 		{
-			data.open_fds.erase(it);
+			data.open_fds->erase(it);
 			break;
 		}
 	}

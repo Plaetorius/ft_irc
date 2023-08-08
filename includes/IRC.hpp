@@ -49,7 +49,7 @@ typedef struct s_data
 		int					port;
 		std::string			password;
 		t_users				users;
-		vector<int>			open_fds;
+		vector<int>			*open_fds;
 } 							t_data;
 
 

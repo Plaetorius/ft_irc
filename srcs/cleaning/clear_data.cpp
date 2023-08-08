@@ -17,13 +17,14 @@ void	clear_data(t_data &data)
 	map<int, User *>::iterator ite_users = data.users.end();
 	for (; it_users != ite_users; it_users++)
 		delete	it_users->second;
-	vector<int>::iterator  it_open_fds = data.open_fds.begin();
-	vector<int>::iterator  ite_open_fds = data.open_fds.end();
+	vector<int>::iterator  it_open_fds = data.open_fds->begin();
+	vector<int>::iterator  ite_open_fds = data.open_fds->end();
 	for (; it_open_fds != ite_open_fds; it_open_fds++)
 		close(*it_open_fds);
 	data.users.clear();
-	data.open_fds.clear();
-
+	data.open_fds->clear();
+	cout << "Size users " << data.users.size() << " Open Fds " << data.open_fds->size() << endl;
+	delete data.open_fds;
 }
 
 void	clear_data_exit(t_data &data, std::string message, int err_code)
