@@ -1,7 +1,7 @@
-NAME	= ircserver
+NAME	= ircserv
 CC		= c++
 DEP_FLAG= -MMD
-FLAGS	= -Wall -Wextra -Werror ${C98} ${DEP_FLAG}
+FLAGS	= -Wall -Wextra ${C98} ${DEP_FLAG} #-----------------ADD WERROR
 C98		= -std=c++98
 INCL	= -I includes
 SRCS	=	$(addsuffix .cpp,		\
@@ -18,6 +18,7 @@ SRCS	=	$(addsuffix .cpp,		\
 			)						\
 			$(addprefix server/,	\
 				actions				\
+				commands			\
 			)						\
 			$(addprefix cleaning/,	\
 				clear_data			\
@@ -65,4 +66,4 @@ re: fclean all
 
 -include ${DEPS}
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re test

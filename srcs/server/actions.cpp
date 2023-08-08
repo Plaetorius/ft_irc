@@ -27,7 +27,7 @@ static void	user_connection(t_data &data)
 	cout << "User " << user_id++ << " connected" << endl;
 }
 
-static void	user_deconnection(t_data &data, int fd)
+static void	user_disconnection(t_data &data, int fd)
 {
 	int						id_disc_user;
 	User					*disc_user;
@@ -61,8 +61,29 @@ static void	user_deconnection(t_data &data, int fd)
 	cout << "User " << id_disc_user << " disconnected." << endl;
 }
 
+
+string	read_connection_data(int fd_user) {
+	char				buff[READ_SIZE + 1];
+	int					bytes_read;
+	string				res;	
+
+	
+	bzero(buff, READ_SIZE + 1);
+	bytes_read = read(fd_user, buff, READ_SIZE);
+	return res;
+}
+
+static void	user_command(int id_user, t_data &data)
+{
+	static map<int, string>		command;
+	
+	command[id_user].append(read_connection_data(data.users[id_user]->get_fd()));
+
+	return ;
+}
+
 /*
-	Server Actions``
+	Server Actions
 
 	Perform connection, deconnection and execution of commands issued by users
 	
@@ -80,7 +101,7 @@ void	server_actions(t_data &data, int i)
 	if (data.events[i].data.fd == data.socket_fd)			//Check if the user 
 		user_connection(data);								//Connect a user
 	if (data.events[i].events & EPOLLRDHUP)					//Check if the user has shutdown the connection
-		user_deconnection(data, data.events[i].data.fd);	//Disconnect a user
+		user_disconnection(data, data.events[i].data.fd);	//Disconnect a user
 	else if (user_id != -1) 								//Issue a command if the user hasn't been disconnected
-		exit(0);
+		user_command(user_id, data);
 } 

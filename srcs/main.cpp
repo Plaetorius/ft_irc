@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 	while (true)
 	{
 		epoll_fds = epoll_wait(data.epoll_fd, data.events, MAX_CONNECTIONS, -1);
-		if (epoll_fds == -1)
+		if (epoll_fds < 0)
 			return (clear_data(data), error_str("epoll_wait() failed"), EXIT_FAILURE);
 		for (int i = 0; i < epoll_fds; i++)
 			server_actions(data, i);

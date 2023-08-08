@@ -23,13 +23,14 @@ class User;
 using namespace std;
 # define MAX_CONNECTIONS 16
 # define LOCAL_HOST "127.0.0.1"
+# define READ_SIZE	512 //max message size. 510 "usable characters". 2 last ones MUST be \r\n
 
 typedef std::map<int, User*> t_users;
 
 typedef struct s_data
 {
 		int					socket_fd;
-		struct sockaddr_in	serv_addr;
+		struct sockaddr_in	socket_addr;
 		int					epoll_fd;
 		epoll_event			socket_event;
 		epoll_event			events[MAX_CONNECTIONS];
@@ -63,10 +64,11 @@ bool	init(int &port, t_data &data);
 
 /******************************************************************************/
 /*																		      */
-/*                                  Cleaning                                  */
+/*                                  Server           	                      */
 /*																		      */
 /******************************************************************************/
 void	server_actions(t_data &data, int i);
+vector<string>	get_command(int id_user, t_data &data);
 
 /******************************************************************************/
 /*																		      */
