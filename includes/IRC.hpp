@@ -17,6 +17,7 @@
 # include <string.h>
 # include <sys/epoll.h>
 # include <fcntl.h>
+# include <signal.h>
 
 class User;
 
@@ -27,16 +28,24 @@ using namespace std;
 
 typedef std::map<int, User*> t_users;
 
+typedef struct s_epoll
+{
+	int					fd;
+	epoll_event			events[MAX_CONNECTIONS];
+}						t_epoll;
 
+typedef struct s_socket
+{
+	int					fd;
+	epoll_event			event;
+	struct sockaddr_in	addr;
+}						t_socket;
 
 
 typedef struct s_data
 {
-		int					socket_fd;
-		struct sockaddr_in	socket_addr;
-		int					epoll_fd;
-		epoll_event			socket_event;
-		epoll_event			events[MAX_CONNECTIONS];
+		t_epoll				epoll;
+		t_socket			socket;
 		int					port;
 		std::string			password;
 		t_users				users;
@@ -79,7 +88,7 @@ vector<string>	get_command(int id_user, t_data &data);
 /*																		      */
 /******************************************************************************/
 void	clear_data(t_data &data);
-void	clear_data_exit(t_data &data, std::string err_message, int err_code);
+void	clear_data_exit(t_data &data, std::string message, int err_code);
 
 /******************************************************************************/
 /*																		      */

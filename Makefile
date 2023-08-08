@@ -1,7 +1,7 @@
 NAME	= ircserv
 CC		= c++
 DEP_FLAG= -MMD
-FLAGS	= -Wall -Wextra ${C98} ${DEP_FLAG} #-----------------ADD WERROR
+FLAGS	= -Wall -Wextra ${C98} ${DEP_FLAG} -g3 #-----------------ADD WERROR
 C98		= -std=c++98
 INCL	= -I includes
 SRCS	=	$(addsuffix .cpp,		\

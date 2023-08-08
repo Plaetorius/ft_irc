@@ -13,7 +13,7 @@ static void	user_connection(t_data &data)
 	size_socket_new_con = sizeof(socket_new_con);
 	socket_new_con = sockaddr_in();
 	epoll_event_new_con = epoll_event();
-	fd_new_con = accept(data.socket_fd, (struct sockaddr *)&socket_new_con, &size_socket_new_con);
+	fd_new_con = accept(data.socket.fd, (struct sockaddr *)&socket_new_con, &size_socket_new_con);
 	if (fd_new_con < 0)
 		clear_data_exit(data, "accept() failed", 1);
 	new_user = new User(fd_new_con, user_id);
@@ -22,7 +22,7 @@ static void	user_connection(t_data &data)
 	epoll_event_new_con.events = EPOLLIN | EPOLLRDHUP;
 	epoll_event_new_con.data.fd = fd_new_con;
 	fcntl(fd_new_con, F_SETFL, O_NONBLOCK); //Imposed by the subject
-	if (epoll_ctl(data.epoll_fd, EPOLL_CTL_ADD, fd_new_con, &epoll_event_new_con) < 0)
+	if (epoll_ctl(data.epoll.fd, EPOLL_CTL_ADD, fd_new_con, &epoll_event_new_con) < 0)
 		clear_data_exit(data, "epoll_ctl() failed", 1);
 	cout << "User " << user_id++ << " connected :)" << endl;
 }
@@ -34,7 +34,7 @@ static void	user_disconnection(t_data &data, int fd)
 	vector<int>::iterator	it;
 	vector<int>::iterator	ite;
 
-	epoll_ctl(data.epoll_fd, EPOLL_CTL_DEL, fd, &data.socket_event);
+	epoll_ctl(data.epoll.fd, EPOLL_CTL_DEL, fd, &data.socket.event);
 	close(fd);
 	id_disc_user = find_id(fd, data);
 	try
@@ -79,12 +79,15 @@ static void	user_command(int id_user, t_data &data)
 */
 void	server_actions(t_data &data, int i)
 {
-	int user_id = find_id(data.events[i].data.fd, data);
+	int user_id = find_id(data.epoll.events[i].data.fd, data);
 
-	if (data.events[i].data.fd == data.socket_fd)			//Check if the user 
+	if (data.epoll.events[i].data.fd == data.socket.fd)			//Check if the user 
 		user_connection(data);								//Connect a user
-	if (data.events[i].events & EPOLLRDHUP)					//Check if the user has shutdown the connection
-		user_disconnection(data, data.events[i].data.fd);	//Disconnect a user
+	if ((data.epoll.events[i].events & EPOLLERR)
+		|| (data.epoll.events[i].events & EPOLLHUP)
+		|| (data.epoll.events[i].events & EPOLLRDHUP)
+		|| !(data.epoll.events[i].events & EPOLLIN))					//Check if the user has shutdown the connection
+		user_disconnection(data, data.epoll.events[i].data.fd);	//Disconnect a user
 	else if (user_id != -1) 								//Issue a command if the user hasn't been disconnected
 		user_command(user_id, data);
 } 
