@@ -15,12 +15,7 @@ static string	read_user_input(int	user_fd, t_data &data)
 vector<string>	format_user_input(int user_fd, t_data &data)
 {
 	vector<string> res;
-	char	buffer[READ_SIZE + 1];
-	int		len_read;
 
-	bzero(buffer, READ_SIZE + 1);
-	len_read = read(user_fd, buffer, READ_SIZE);
-	cout << buffer << endl;
-	res.push_back(buffer);
+	res.push_back(read_user_input(user_fd, data));
 	return res;
 }

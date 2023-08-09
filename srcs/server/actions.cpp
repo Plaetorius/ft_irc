@@ -24,8 +24,6 @@ static void	user_connection(t_data &data)
 	fcntl(fd_new_con, F_SETFL, O_NONBLOCK); //Imposed by the subject
 	if (epoll_ctl(data.epoll.fd, EPOLL_CTL_ADD, fd_new_con, &epoll_event_new_con) < 0)
 		clear_data_exit(data, "epoll_ctl() failed", 1);
-	cout << "User " << user_id++ << " connected, on fd " << fd_new_con << endl;
-	cout << "ID" << new_user->get_id() << "FD" << new_user->get_fd()  << endl;
 }
 
 static void	user_disconnection(t_data &data, int fd)
@@ -66,6 +64,17 @@ static void	user_disconnection(t_data &data, int fd)
 static void	user_command(int user_fd, t_data &data)
 {
 	vector<string> command = format_user_input(user_fd, data);
+
+	if (command.empty())
+		return ;
+	vector<string>::iterator it = command.begin();
+	vector<string>::iterator ite = command.end();
+
+	for (; it != ite; it++)
+	{
+		cout << *it;
+	}
+	cout << endl;
 }
 
 /*

@@ -11,7 +11,7 @@ t_data	*g_data_ptr;
 void	signal_handler(int code)
 {
 	(void)code;
-	clear_data_exit(*g_data_ptr, "ctrl+c", 0);
+	clear_data_exit(*g_data_ptr, "SIGINT", 0);
 }
 
 int main(int argc, char *argv[])
