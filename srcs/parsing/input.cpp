@@ -15,6 +15,7 @@ static string	read_user_input(int	user_fd, t_data &data)
 vector<string>	format_user_input(int user_fd, t_data &data)
 {
 	vector<string> res;
+	string	raw_input = read_user_input(user_fd, data);
 
 	res.push_back(read_user_input(user_fd, data));
 	return res;

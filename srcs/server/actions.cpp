@@ -45,7 +45,6 @@ static void	user_disconnection(t_data &data, int fd)
 		return ;
 	}
 	id_disc_user = disc_user->get_id();
-	cout << "ID/FD" << id_disc_user << "/" << fd << endl; 
 	data.users.erase(fd);
 	delete disc_user;
 	it = data.open_fds.begin();
