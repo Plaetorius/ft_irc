@@ -1,0 +1,9 @@
+Port: 6667
+Password: test
+Enjoy ;)
+User ID -1
+data.events[i].data.fd 3 data.socket_fd 3
+User 1 connected
+Get Id 1
+User ID 1
+data.events[i].data.fd 5 data.socket_fd 3

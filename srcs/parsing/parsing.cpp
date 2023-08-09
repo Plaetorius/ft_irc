@@ -7,30 +7,15 @@ static bool parse_port(char *port_str, int &port)
 	errno = 0;
 	port = strtod(port_str, &end_ptr);
 	if (errno == ERANGE)
-	{
-		error_str("port is out of range");
-		return false;
-	}
+		return error_str("port is out of range");
 	if (*end_ptr != '\0')
-	{
-		cerr << "invalid char in \"port\" argument: " << *end_ptr << endl;
-		return false;
-	}
+		return error_str("invalid char in \"port\" argument: " + string(1, *end_ptr));
 	if (port < 0)
-	{
-		error_str("port number can't be negative");
-		return false;
-	}
+		return error_str("port number can't be negative");
 	if (port <= 1023)
-	{
-		error_str("port is system reserved port range (0-1023)");
-		return false;
-	}
+		return error_str("port is system reserved port range (0-1023)");
 	if (port > 65535)
-	{
-		error_str("port number is too big");
-		return false;
-	}
+		return error_str("port number is too big");
 	return true;	
 }
 
@@ -38,10 +23,7 @@ static bool	parse_password(char *password_str, string &password)
 {
 	password = password_str;
 	if (password.empty() || password.size() < 1)
-	{
-		error_str("password can't be empty");
-		return false;
-	}
+		return error_str("password can't be empty");
 	return true;
 }
 

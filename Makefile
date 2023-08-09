@@ -1,7 +1,7 @@
-NAME	= ircserver
+NAME	= ircserv
 CC		= c++
 DEP_FLAG= -MMD
-FLAGS	= -Wall -Wextra -Werror ${C98} ${DEP_FLAG}
+FLAGS	= -Wall -Wextra ${C98} ${DEP_FLAG} -g3 #-----------------ADD WERROR
 C98		= -std=c++98
 INCL	= -I includes
 SRCS	=	$(addsuffix .cpp,		\
@@ -9,12 +9,22 @@ SRCS	=	$(addsuffix .cpp,		\
 				main				\
 			$(addprefix parsing/,	\
 				parsing				\
+				input				\
 			)						\
 			$(addprefix error/,		\
 				error				\
 			)						\
 			$(addprefix init/,		\
 				init				\
+			)						\
+			$(addprefix server/,	\
+				actions				\
+			)						\
+			$(addprefix cleaning/,	\
+				clear_data			\
+			)						\
+			$(addprefix utils/,		\
+				find_user_fd		\
 			)))
 CLAS	= 	$(addsuffix .cpp,		\
 			$(addprefix classes/,	\
@@ -41,8 +51,7 @@ ${NAME}: ${OBJS}
 all: ${NAME}
 
 test: re 
-	@echo "${CYAN}No automated tests for this one!${NC}"
-	@valgrind ./${NAME}
+	@valgrind --track-fds=yes ./${NAME} 6667 Victor
 	@make fclean
 
 clean:
@@ -57,4 +66,4 @@ re: fclean all
 
 -include ${DEPS}
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re test
