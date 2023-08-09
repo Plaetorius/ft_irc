@@ -24,9 +24,9 @@ class User;
 using namespace std;
 # define MAX_CONNECTIONS 16
 # define LOCAL_HOST "127.0.0.1"
-# define READ_SIZE	512 //max message size. 510 "usable characters". 2 last ones MUST be \r\n
+# define READ_SIZE	512 			//Max message size. 510 "usable characters". 2 last ones MUST be \r\n
 
-typedef std::map<int, User*> t_users;
+typedef map<int, User*> t_users; 	//Users will be mapped key: fd; User*: User corresponding to the fd
 
 typedef struct s_epoll
 {
@@ -44,13 +44,13 @@ typedef struct s_socket
 
 typedef struct s_data
 {
-		t_epoll				epoll;
-		t_socket			socket;
-		int					port;
-		std::string			password;
-		t_users				users;
-		vector<int>			open_fds;
-} 							t_data;
+		t_epoll			epoll;
+		t_socket		socket;
+		int				port;
+		string			password;
+		t_users			users;
+		vector<int>		open_fds;
+} 						t_data;
 
 
 /******************************************************************************/
@@ -59,6 +59,7 @@ typedef struct s_data
 /*																		      */
 /******************************************************************************/
 bool	parsing(char **argv, int &port, string &password);
+vector<string>	format_user_input(int user_fd, t_data &data);
 
 /******************************************************************************/
 /*																		      */
@@ -80,7 +81,6 @@ bool	init(int &port, t_data &data);
 /*																		      */
 /******************************************************************************/
 void	server_actions(t_data &data, int i);
-vector<string>	get_command(int id_user, t_data &data);
 
 /******************************************************************************/
 /*																		      */
@@ -88,14 +88,14 @@ vector<string>	get_command(int id_user, t_data &data);
 /*																		      */
 /******************************************************************************/
 void	clear_data(t_data &data);
-void	clear_data_exit(t_data &data, std::string message, int err_code);
+void	clear_data_exit(t_data &data, string message, int err_code);
 
 /******************************************************************************/
 /*																		      */
 /*                                  Utils		                              */
 /*																		      */
 /******************************************************************************/
-int	find_id(int fd, t_data &data);
+int		find_user_fd(int fd, t_data &data);
 
 
 #endif

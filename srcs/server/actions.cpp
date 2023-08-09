@@ -17,14 +17,15 @@ static void	user_connection(t_data &data)
 	if (fd_new_con < 0)
 		clear_data_exit(data, "accept() failed", 1);
 	new_user = new User(fd_new_con, user_id);
-	data.users.insert(make_pair<int, User *>(user_id, new_user));
+	data.users.insert(make_pair<int, User *>(fd_new_con, new_user));
 	data.open_fds.push_back(fd_new_con);
 	epoll_event_new_con.events = EPOLLIN | EPOLLRDHUP;
 	epoll_event_new_con.data.fd = fd_new_con;
 	fcntl(fd_new_con, F_SETFL, O_NONBLOCK); //Imposed by the subject
 	if (epoll_ctl(data.epoll.fd, EPOLL_CTL_ADD, fd_new_con, &epoll_event_new_con) < 0)
 		clear_data_exit(data, "epoll_ctl() failed", 1);
-	cout << "User " << user_id++ << " connected :)" << endl;
+	cout << "User " << user_id++ << " connected, on fd " << fd_new_con << endl;
+	cout << "ID" << new_user->get_id() << "FD" << new_user->get_fd()  << endl;
 }
 
 static void	user_disconnection(t_data &data, int fd)
@@ -36,17 +37,18 @@ static void	user_disconnection(t_data &data, int fd)
 
 	epoll_ctl(data.epoll.fd, EPOLL_CTL_DEL, fd, &data.socket.event);
 	close(fd);
-	id_disc_user = find_id(fd, data);
 	try
 	{
-		disc_user = data.users.at(id_disc_user);
+		disc_user = data.users.at(fd);
 	}
-	catch (std::out_of_range)
+	catch (out_of_range)
 	{
 		cerr << "Couldn't disconnect User with fd " << fd << "; there is no such user" << endl;
 		return ;
 	}
-	data.users.erase(id_disc_user);
+	id_disc_user = disc_user->get_id();
+	cout << "ID/FD" << id_disc_user << "/" << fd << endl; 
+	data.users.erase(fd);
 	delete disc_user;
 	it = data.open_fds.begin();
 	ite = data.open_fds.end();
@@ -61,10 +63,9 @@ static void	user_disconnection(t_data &data, int fd)
 	cout << "User " << id_disc_user << " disconnected :(" << endl;
 }
 
-static void	user_command(int id_user, t_data &data)
+static void	user_command(int user_fd, t_data &data)
 {
-	static map<int, string>		command;
-
+	vector<string> command = format_user_input(user_fd, data);
 }
 
 /*
@@ -79,15 +80,15 @@ static void	user_command(int id_user, t_data &data)
 */
 void	server_actions(t_data &data, int i)
 {
-	int user_id = find_id(data.epoll.events[i].data.fd, data);
+	const int user_fd = find_user_fd(data.epoll.events[i].data.fd, data);
 
 	if (data.epoll.events[i].data.fd == data.socket.fd)			//Check if the user 
-		user_connection(data);								//Connect a user
+		user_connection(data);									//Connect a user
 	if ((data.epoll.events[i].events & EPOLLERR)
 		|| (data.epoll.events[i].events & EPOLLHUP)
 		|| (data.epoll.events[i].events & EPOLLRDHUP)
-		|| !(data.epoll.events[i].events & EPOLLIN))					//Check if the user has shutdown the connection
+		|| !(data.epoll.events[i].events & EPOLLIN))			//Check if the user has shutdown the connection
 		user_disconnection(data, data.epoll.events[i].data.fd);	//Disconnect a user
-	else if (user_id != -1) 								//Issue a command if the user hasn't been disconnected
-		user_command(user_id, data);
+	else if (user_fd != -1 && data.users[user_fd]->get_id() != -1) 									//Issue a command if the user hasn't been disconnected
+		user_command(user_fd, data);
 } 
