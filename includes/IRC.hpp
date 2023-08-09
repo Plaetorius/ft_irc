@@ -47,7 +47,7 @@ typedef struct s_command
 	string				command;
 	vector<string>		parameters;
 	string				last_param;
-}
+}						t_command;
 
 typedef struct s_data
 {
