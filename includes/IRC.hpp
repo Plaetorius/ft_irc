@@ -41,6 +41,13 @@ typedef struct s_socket
 	struct sockaddr_in	addr;
 }						t_socket;
 
+typedef struct s_command
+{
+	string				prefix;
+	string				command;
+	vector<string>		parameters;
+	string				last_param;
+}
 
 typedef struct s_data
 {
