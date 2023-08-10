@@ -24,6 +24,7 @@ static void	user_connection(t_data &data)
 	fcntl(fd_new_con, F_SETFL, O_NONBLOCK); //Imposed by the subject
 	if (epoll_ctl(data.epoll.fd, EPOLL_CTL_ADD, fd_new_con, &epoll_event_new_con) < 0)
 		clear_data_exit(data, "epoll_ctl() failed", 1);
+	cout << "User " << user_id++ << " connected :)" << endl; 
 }
 
 static void	user_disconnection(t_data &data, int fd)
@@ -62,18 +63,55 @@ static void	user_disconnection(t_data &data, int fd)
 
 static void	user_command(int user_fd, t_data &data)
 {
-	vector<string> command = format_user_input(user_fd, data);
+	t_command command = format_user_input(user_fd, data);
 
-	if (command.empty())
-		return ;
-	vector<string>::iterator it = command.begin();
-	vector<string>::iterator ite = command.end();
+	// if (command.command.empty())
+	// {
+	// 	cout << "Command is empty" << endl;
+	// 	return ;
+	// }
+	t_users::iterator it = data.users.begin();
+	t_users::iterator ite = data.users.end();
+	vector<string>::iterator it_param = command.parameters.begin();
+	vector<string>::iterator ite_param = command.parameters.end();
 
 	for (; it != ite; it++)
 	{
-		cout << *it;
+		if (it->second->get_fd() != user_fd)
+		{
+			string tmp = "User " + int_to_string(data.users.at(user_fd)->get_id()) + ":\nprefix:\n";
+			write(it->second->get_fd(), tmp.c_str(), tmp.size());
+			cout << tmp;
+			if (command.prefix.empty() == false)
+			{
+				write(it->second->get_fd(), command.prefix.c_str(), command.prefix.size());
+				cout << command.prefix << endl;
+			}
+			write(it->second->get_fd(), "\n", 1);
+			tmp = "command:\n";
+			write(it->second->get_fd(), tmp.c_str(), tmp.size());
+			cout << tmp;
+			write(it->second->get_fd(), command.command.c_str(), command.command.size());
+			cout << command.command << endl;
+			write(it->second->get_fd(), "\n", 1);
+			tmp = "parameters:\n";
+			write(it->second->get_fd(), tmp.c_str(), tmp.size());
+			cout << tmp;
+			for (; it_param != ite_param; it_param++)
+			{
+				write(it->second->get_fd(), it_param->c_str(), it_param->size());
+				cout << *it_param << endl;
+				write(it->second->get_fd(), "\n", 1);
+			}
+			tmp = "last parameter:\n";
+			write(it->second->get_fd(), tmp.c_str(), tmp.size());
+			cout << tmp;
+			write(it->second->get_fd(), command.last_param.c_str(), command.last_param.size());
+			cout << command.last_param << endl;
+			write(it->second->get_fd(), "\n", 1);
+		}
 	}
-	cout << endl;
+	// write(user_fd, command.command.c_str(), command.command.size());
 }
 
 /*
