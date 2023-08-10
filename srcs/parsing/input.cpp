@@ -25,10 +25,11 @@ t_command	parse_raw_input(string raw_input)
 	if (raw_input[0] == ':' && raw_input.size() > 1)
 	{
 		ind = raw_input.find_first_of(" \r\n");
-		result.prefix = raw_input.substr(1, ind - 1);
-		raw_input = raw_input.substr(result.prefix.size(), raw_input.size() - result.prefix.size());
+		result.prefix = raw_input.substr(1, ind);
+		raw_input = raw_input.substr(result.prefix.size() + 1, raw_input.size() - result.prefix.size());
 		if (raw_input[ind - result.prefix.size()] == '\n')
 			return result;
+		result.prefix = trim_spaces(result.prefix);
 		if (raw_input.size() == 1 && string(" \r\n", 3).find(raw_input[0]))
 			raw_input.clear();		
 	}

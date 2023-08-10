@@ -79,57 +79,51 @@ static void	user_command(int user_fd, t_data &data)
 		it_param = command.parameters.begin();
 		ite_param = command.parameters.end();
 
+		tmp = "User " + int_to_string(data.users.at(user_fd)->get_id()) + ":\nprefix:";
+		cout << tmp << endl;
+		if (command.prefix.empty() == false)
+		{
+			cout << command.prefix << endl;
+		}
+		tmp = "command:";
+		cout << tmp << endl;
+		cout << command.command << endl;
+		tmp = "parameters:";
+		cout << tmp  << endl;
+		for (; it_param != ite_param; it_param++)
+		{
+			cout << *it_param << endl;
+		}
+		tmp = "last parameter:";
+		cout << tmp << endl;
+		cout << command.last_param << endl;
 		for (; it != ite; it++)
 		{
-			tmp = "User " + int_to_string(data.users.at(user_fd)->get_id()) + ":\nprefix:\n";
-			cout << tmp << endl;
-			if (command.prefix.empty() == false)
-			{
-				cout << command.prefix << endl;
-			}
-			tmp = "command:";
-			cout << tmp << endl;
-			cout << command.command << endl;
-			tmp = "parameters:";
-			cout << tmp  << endl;
-			for (; it_param != ite_param; it_param++)
-			{
-				cout << *it_param << endl;
-			}
-			tmp = "last parameter:";
-			cout << tmp << endl;
-			cout << command.last_param << endl;
 			if (it->second->get_fd() != user_fd)
 			{
-				string tmp = "User " + int_to_string(data.users.at(user_fd)->get_id()) + ":\nprefix:\n";
+				tmp = "User " + int_to_string(data.users.at(user_fd)->get_id()) + ":\nprefix:\n";
 				write(it->second->get_fd(), tmp.c_str(), tmp.size());
-				cout << tmp << endl;
 				if (command.prefix.empty() == false)
 				{
 					write(it->second->get_fd(), command.prefix.c_str(), command.prefix.size());
-					cout << command.prefix << endl;
 				}
 				write(it->second->get_fd(), "\n", 1);
-				tmp = "command:";
+				tmp = "command:\n";
 				write(it->second->get_fd(), tmp.c_str(), tmp.size());
-				cout << tmp << endl;
 				write(it->second->get_fd(), command.command.c_str(), command.command.size());
-				cout << command.command << endl;
 				write(it->second->get_fd(), "\n", 1);
-				tmp = "parameters:";
+				tmp = "parameters:\n";
 				write(it->second->get_fd(), tmp.c_str(), tmp.size());
-				cout << tmp  << endl;
+				it_param = command.parameters.begin();
+				ite_param = command.parameters.end();
 				for (; it_param != ite_param; it_param++)
 				{
 					write(it->second->get_fd(), it_param->c_str(), it_param->size());
-					cout << *it_param << endl;
 					write(it->second->get_fd(), "\n", 1);
 				}
-				tmp = "last parameter:";
+				tmp = "last parameter:\n";
 				write(it->second->get_fd(), tmp.c_str(), tmp.size());
-				cout << tmp << endl;
 				write(it->second->get_fd(), command.last_param.c_str(), command.last_param.size());
-				cout << command.last_param << endl;
 				write(it->second->get_fd(), "\n", 1);
 			}
 		}
