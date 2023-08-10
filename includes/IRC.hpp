@@ -27,6 +27,8 @@ using namespace std;
 # define LOCAL_HOST "127.0.0.1"
 # define READ_SIZE	512 			//Max message size. 510 "usable characters". 2 last ones MUST be \r\n
 
+t_data	*g_data_ptr;
+
 typedef map<int, User*> t_users; 	//Users will be mapped key: fd; User*: User corresponding to the fd
 
 typedef struct s_epoll

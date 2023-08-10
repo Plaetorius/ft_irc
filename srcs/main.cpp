@@ -6,7 +6,7 @@
 	Init fds of data to -1, to check in clear_data if the fd has to be closed or not
 */
 
-t_data	*g_data_ptr;
+
 
 void	signal_handler(int code)
 {
