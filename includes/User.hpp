@@ -2,6 +2,7 @@
 # define USER_H
 # include <string>
 # include <iostream>
+# include "IRC.hpp"
 
 using namespace std;
 
@@ -10,6 +11,7 @@ class User
 	private:
 		int	_id;
 		int	_fd;
+		list<t_command> _commands;
 	public:
 		User();
 		User(const  User &obj);
@@ -20,6 +22,9 @@ class User
 
 		int	get_id();
 		int	get_fd();
+
+		void	push_back_command(t_command &command); //TODO add in the input while loop
+		void	execute_commands();
 
 		//TODO remove ; for debug
 		void set_id(int id);

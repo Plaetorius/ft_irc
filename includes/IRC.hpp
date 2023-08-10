@@ -18,6 +18,7 @@
 # include <sys/epoll.h>
 # include <fcntl.h>
 # include <signal.h>
+# include <sstream>
 
 class User;
 
@@ -65,44 +66,46 @@ typedef struct s_data
 /*                                  Parsing                                   */
 /*																		      */
 /******************************************************************************/
-bool	parsing(char **argv, int &port, string &password);
-vector<string>	format_user_input(int user_fd, t_data &data);
+bool		parsing(char **argv, int &port, string &password);
+string		read_raw_input(int	user_fd, t_data &data);
+t_command	parse_raw_input(string raw_input);
 
 /******************************************************************************/
 /*																		      */
 /*									Error									  */
 /*																		      */
 /******************************************************************************/
-bool	error_str(const string error_message);
+bool		error_str(const string error_message);
 
 /******************************************************************************/
 /*																		      */
 /*									Init									  */
 /*																		      */
 /******************************************************************************/
-bool	init(int &port, t_data &data);
+bool		init(int &port, t_data &data);
 
 /******************************************************************************/
 /*																		      */
 /*                                  Server           	                      */
 /*																		      */
 /******************************************************************************/
-void	server_actions(t_data &data, int i);
+void		server_actions(t_data &data, int i);
 
 /******************************************************************************/
 /*																		      */
 /*                                  Cleaning                                  */
 /*																		      */
 /******************************************************************************/
-void	clear_data(t_data &data);
-void	clear_data_exit(t_data &data, string message, int err_code);
-
+void		clear_data(t_data &data);
+void		clear_data_exit(t_data &data, string message, int err_code);
+;
 /******************************************************************************/
 /*																		      */
-/*                                  Utils		                              */
+/*                                 Utils		                              */
 /*																		      */
 /******************************************************************************/
-int		find_user_fd(int fd, t_data &data);
-
+int			find_user_fd(int fd, t_data &data);
+string		int_to_string(int n);
+string		trim_spaces(const string &to_trim);
 
 #endif
