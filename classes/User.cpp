@@ -48,7 +48,7 @@ void	User::execute_commands()
 */
 int	User::get_fd(void) {return this->_fd;};
 int User::get_id(void) {return this->_id;};
-
+string User::get_name(void) {return this->_name;};
 
 //TODO remove ; for debug
 void User::set_id(int id) {this->_id = id;};
