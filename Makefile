@@ -31,6 +31,7 @@ SRCS	=	$(addsuffix .cpp,		\
 CLAS	= 	$(addsuffix .cpp,		\
 			$(addprefix classes/,	\
 				User				\
+				Channel				\
 			))
 OBJS	= ${SRCS:.cpp=.o} ${CLAS:.cpp=.o}
 DEPS	= ${OBJS:.o=.d}
