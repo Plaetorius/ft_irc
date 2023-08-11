@@ -87,6 +87,7 @@ bool	User::command_NICK(t_command &command)
     }
 
     /*  Check consecutive */
+	//TODO use iterator
     for (size_t i = 1; i < param.length(); ++i)
     {
         char ch = param[i];
@@ -101,6 +102,7 @@ bool	User::command_NICK(t_command &command)
     /*  ********************************************************************* */
                     /*  Check if the nick already exists    */
     /*  ********************************************************************* */
+	//TODO use iterator
     for (int i = 0; i < g_data_ptr->open_fds.size(); i++)
     {
         if (g_data_ptr->users[g_data_ptr->open_fds[i]]->get_nick() == param)
@@ -118,6 +120,7 @@ bool	User::command_NICK(t_command &command)
     /*  ********************************************************************* */
     if (this->_has_nick)
     {
+		//TODO use iterator
         for (int i = 0; i < g_data_ptr->open_fds.size(); i++)
         {
             User    *user = g_data_ptr->users[g_data_ptr->open_fds[i]];
