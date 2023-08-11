@@ -109,5 +109,6 @@ void		clear_data_exit(t_data &data, string message, int err_code);
 int			find_user_fd(int fd, t_data &data);
 string		int_to_string(int n);
 string		trim_spaces(const string &to_trim);
+int			nick_to_fd(string &nick, t_data &data);
 
 #endif

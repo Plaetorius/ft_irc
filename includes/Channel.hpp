@@ -28,18 +28,17 @@ class Channel
 		bool			add_user(int fd_user, t_data &data);
 		bool			kick_user(int emitter_fd, int to_kick_fd, string message, t_data &data);
 		bool			op_user(int fd_emitter, int fd_to_op, t_data &data);
-		bool			deop_user(int fd_emitter, int fd_to_deop, t_data &data);
 		bool			invite_user(int fd_emitter, int fd_to_invite, t_data &data);
-		bool			uninvite_user(int fd_emitter, int fd_to_uninvite, t_data &data);
-		void			set_invite_only(bool mode, t_data &data);
+	
+		void			set_invite_only(bool mode, int fd_emitter);
 		void			set_topic(string topic, int fd_emitter, t_data &data); //TODO maybe change to reference
 
-		const string	get_name(void) const;
-		vector<int>		get_users(void);
-		vector<int>		get_ops(void);
-		vector<int>		get_invited(void);
-		bool			get_invite_only(void);
-		const string	get_topic(void) const;
+		string			get_name(void) const;
+		vector<int>		get_users(void) const;
+		vector<int>		get_ops(void) const;
+		vector<int>		get_invited(void) const;
+		bool			get_invite_only(void) const;
+		string			get_topic(void) const;
 
 		void			broadcast(string message, int fd_emitter);
 };

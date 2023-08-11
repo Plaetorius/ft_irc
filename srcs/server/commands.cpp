@@ -95,7 +95,7 @@ bool	User::command_NICK(t_command &command)
     /*  ********************************************************************* */
     for (int i = 0; i < g_data_ptr->open_fds.size(); i++)
     {
-        if (g_data_ptr->users[g_data_ptr->open_fds[i]]->get_nickname() == param)
+        if (g_data_ptr->users[g_data_ptr->open_fds[i]]->get_nick() == param)
         {
             if (g_data_ptr->open_fds[i] != this->_fd)
             {
@@ -114,7 +114,7 @@ bool	User::command_NICK(t_command &command)
         {
             User    *user = g_data_ptr->users[g_data_ptr->open_fds[i]];
             if (user->get_identification() == true && user->get_fd() != this->_fd)
-                user->send_message(CHANGE_NICKNAME(user->get_nickname(), param));
+                user->send_message(CHANGE_NICKNAME(user->get_nick(), param));
         }
     }
 
