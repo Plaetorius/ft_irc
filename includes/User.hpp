@@ -3,6 +3,7 @@
 # include <string>
 # include <iostream>
 # include "IRC.hpp"
+# include "Channel.hpp"
 
 using namespace std;
 
@@ -13,8 +14,7 @@ class User
 		string	_nick, _user, _name;
 		bool	_has_password, _has_nick, _has_user;
 		bool	_is_operator, _is_identified;
-		//		Something for channels;	
-		
+		vector<Channel>	_channels;
 		list<t_command> _commands;
 
 	public:
@@ -48,10 +48,10 @@ class User
 		bool	command_INVITE(t_command &command);
 
 		/*	Getters and Setters	*/
-		int		get_id() const;
-		int		get_fd() const;
-		string	get_nickname() const;
-		bool	get_identification() const;
+		int		get_id(void) const;
+		int		get_fd(void) const;
+		string	get_nick(void) const;
+		bool	get_identification(void) const;
 		void	set_id(int id);		//TODO remove ; for debug
 		void	set_fd(int fd);		//TODO remove ; for debug
 };

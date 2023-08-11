@@ -46,9 +46,9 @@ void	User::execute_commands()
 /*
 				GETTERS
 */
-int	User::get_fd(void) {return this->_fd;};
-int User::get_id(void) {return this->_id;};
-string User::get_name(void) {return this->_name;};
+int	User::get_fd(void) const {return this->_fd;};
+int User::get_id(void) const {return this->_id;};
+string User::get_nick(void) const {return this->_nick;};
 
 //TODO remove ; for debug
 void User::set_id(int id) {this->_id = id;};
