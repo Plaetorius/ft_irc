@@ -54,6 +54,14 @@ bool	User::command_PASS(t_command &command, string const& password)
  */
 bool	User::command_NICK(t_command &command)
 {
+	/*  ********************************************************************* */
+				/*	Check if password is set	*/
+	/*  ********************************************************************* */
+	if (!_has_password) {
+		send_message(PERMISSIONDENIED);
+		return false;
+	}
+
     /*  ********************************************************************* */
     /*  Check if proper number of parameters    */
     /*  ********************************************************************* */
@@ -95,7 +103,7 @@ bool	User::command_NICK(t_command &command)
     /*  ********************************************************************* */
     for (int i = 0; i < g_data_ptr->open_fds.size(); i++)
     {
-        if (g_data_ptr->users[g_data_ptr->open_fds[i]]->get_nickname() == param)
+        if (g_data_ptr->users[g_data_ptr->open_fds[i]]->get_nick() == param)
         {
             if (g_data_ptr->open_fds[i] != this->_fd)
             {
@@ -114,7 +122,7 @@ bool	User::command_NICK(t_command &command)
         {
             User    *user = g_data_ptr->users[g_data_ptr->open_fds[i]];
             if (user->get_identification() == true && user->get_fd() != this->_fd)
-                user->send_message(CHANGE_NICKNAME(user->get_nickname(), param));
+                user->send_message(CHANGE_NICKNAME(user->get_nick(), param));
         }
     }
 
@@ -132,9 +140,47 @@ bool	User::command_NICK(t_command &command)
     return true;
 }
 
+/**
+ * @brief   specify the username and realname of a new user.
+ * 
+ * @return  Why do I need it?
+ * @link    https://modern.ircdocs.horse/#user-message
+ * 
+ * @bug     In the protocol, the username could be stated by IDENT protocol
+ *          https://datatracker.ietf.org/doc/html/rfc1413 I didn't implement it
+ * @bug		It is said that the command should contain 0 or *, but I didn't understand why
+ */
 bool	User::command_USER(t_command &command)
 {
+	/*	********************************************************************* */
+								/*	Small checks	*/
+	/*	********************************************************************* */
+	if (!_has_password) {
+		send_message(PERMISSIONDENIED);
+		return false;
+	}
+	if (command.last_param.empty() == true || command.parameters.size() == 0) {
+		send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "USER"));
+		return false;
+	}
+	if (_has_user) {
+		send_message(ERR_ALREADYREGISTERED(int_to_string(_id)));
+		return false;
+	}
 
+	/*	********************************************************************* */
+							/*	Set the username	*/
+	/*	********************************************************************* */
+	this->_user = command.parameters.front();
+	this->_name = command.last_param;
+	_has_user = true;
+	if (_has_user && _has_nick && !_is_identified)
+	{
+		this->_is_identified = true;
+		send_message(RPL_WELCOME(int_to_string(_id), _nick, _user, 
+                                    int_to_string(g_data_ptr->port)));
+	} 
+	return true;
 }
 
 bool	User::command_PING(t_command &command)
