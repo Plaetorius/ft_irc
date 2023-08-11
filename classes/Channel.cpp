@@ -141,7 +141,7 @@ bool	Channel::op_user(int fd_emitter, int fd_to_op, t_data &data)
 	if (is_user(fd_to_op) == false)
 		return error_feedback(fd_emitter, "Can't OP: this user isn't in the channel");
 	this->_fds_ops.push_back(fd_to_op);
-	this->broadcast(data.users.at(fd_to_op)->get_name() + " is now channel operator!", fd_emitter);
+	this->broadcast(data.users.at(fd_to_op)->get_nick() + " is now channel operator!", fd_emitter);
 	return true;
 }
 
