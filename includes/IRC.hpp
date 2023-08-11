@@ -21,6 +21,7 @@
 # include <sstream>
 
 class User;
+class Channel;
 
 using namespace std;
 # define MAX_CONNECTIONS 16
@@ -28,7 +29,8 @@ using namespace std;
 # define READ_SIZE	512 			//Max message size. 510 "usable characters". 2 last ones MUST be \r\n
 # define DEBUG false
 
-typedef map<int, User*> t_users; 	//Users will be mapped key: fd; User*: User corresponding to the fd
+typedef map<int, User*> 		t_users; 	//Users will be mapped key: fd; User*: User corresponding to the fd
+typedef map<string, Channel *>	t_channels; //Key: channel name; Channel*: corresponding Channel
 
 typedef struct s_epoll
 {
@@ -53,13 +55,14 @@ typedef struct s_command
 
 typedef struct s_data
 {
-		t_epoll			epoll;
-		t_socket		socket;
-		int				port;
-		string			password;
-		t_users			users;
-		vector<int>		open_fds;
-} 						t_data;
+        t_epoll			epoll;
+        t_socket		socket;
+        int				port;
+        string			password;
+        t_users			users;
+        vector<int>		open_fds;
+        t_channels		channels;
+}						t_data;
 
 extern t_data	*g_data_ptr;
 

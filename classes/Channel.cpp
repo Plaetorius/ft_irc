@@ -110,7 +110,7 @@ bool	Channel::add_user(int fd_user, t_data &data)
 	if (this->get_invite_only() == true && is_invited(fd_user) == false)
 		return error_str("Can't join #" + this->get_name() + ", you must be invited.");
 	this->_fds_users.push_back(fd_user);
-	this->broadcast("User " + int_to_string(fd_user) + " joined the channel!", fd_user);
+	this->broadcast(data.users.at(fd_user)->get_nick() + " joined the channel!", fd_user);
 	return true;
 }
 
@@ -126,7 +126,7 @@ bool	Channel::kick_user(int fd_emitter, int fd_to_kick, string message, t_data &
 	message = trim_spaces(message);
 	if (message.empty())
 		message = "You have been kicked by an operator";
-	this->broadcast("User " + int_to_string(fd_to_kick) + " was kicked from " + this->_name + " by User " + int_to_string(fd_emitter) + " for: " + message + "\n", fd_emitter);
+	this->broadcast(data.users.at(fd_to_kick)->get_nick() + " was kicked from " + this->_name + " by " + data.users.at(fd_emitter)->get_nick() + " for: " + message + "\n", fd_emitter);
 	return true;
 }
 
@@ -156,7 +156,7 @@ bool	Channel::invite_user(int fd_emitter, int fd_to_invite, t_data &data)
 		return error_feedback(fd_emitter, "You are not channel operator");
 	if (fd_to_invite < 5)
 		return error_feedback(fd_emitter, "Can't invite: this user doesn't exist");
-	//TODO keep or delete, if kept delete the following part of code that has the same condition
+	//TODO keep or delete, if kept delete the next if but keep the code
 	// if (is_invited(fd_to_invite))
 	// 	return error_feedback(fd_emitter, "Can't invite: this user is already invited");
 	if (is_invited(fd_to_invite) == false)
@@ -178,30 +178,28 @@ bool	Channel::invite_user(int fd_emitter, int fd_to_invite, t_data &data)
 /*																		      */
 /******************************************************************************/
 
-void	Channel::set_invite_only(bool mode, int fd_emitter)
+bool	Channel::set_invite_only(bool mode, int fd_emitter)
 {
 	if (is_op(fd_emitter) == false)
-	{
-		error_feedback(fd_emitter, "You are not channel operator");
-		return ; 
-	}
+		return error_feedback(fd_emitter, "You are not channel operator"); 
 	this->_is_invite_only = mode;
-	if (this->_is_invite_only)
+	if (this->_is_invite_only == true)
+	{
+		add_users_to_invited();
 		broadcast("#" + this->get_name() + " is now invite only.", fd_emitter);
+	}
 	else
 		broadcast("#" + this->get_name() + " is no longer invite only.", fd_emitter);
+	return true;
 }
 
-
-void	Channel::set_topic(string topic, int fd_emitter, t_data &data)
+bool	Channel::set_topic(string topic, int fd_emitter, t_data &data)
 {
 	if (topic.empty())
-	{
-		error_feedback(fd_emitter, "Topic can't be empty");
-		return ;
-	}
+		return error_feedback(fd_emitter, "Topic can't be empty");
 	this->_topic = topic;
 	this->broadcast(data.users.at(fd_emitter)->get_nick() +  " has changed topic to " + topic, fd_emitter);
+	return true;
 }
 
 /******************************************************************************/
@@ -226,6 +224,15 @@ void	Channel::broadcast(string message, int fd_emitter)
 	{
 		write(*it, message.c_str(), message.size());
 	}
+}
+
+void	Channel::add_users_to_invited(void)
+{
+	vector<int>::iterator	it_users = this->_fds_users.begin();
+	vector<int>::iterator	ite_users = this->_fds_users.end();
+	for(; it_users != ite_users; it_users++)
+		if (is_invited(*it_users) == false)
+			this->_fds_invited.push_back(*it_users);
 }
 
 /******************************************************************************/
