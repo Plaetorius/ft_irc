@@ -34,8 +34,24 @@ CLAS	= 	$(addsuffix .cpp,		\
 				User				\
 				Channel				\
 			))
+BONUS	= 	$(addsuffix .cpp,		\
+			$(addprefix bot/,		\
+				bot					\
+			)						\
+			$(addprefix utils/,		\
+				trim_spaces			\
+				int_to_string		\
+			)						\
+			$(addprefix error/,		\
+				error_str			\
+			)						\
+			$(addprefix parsing/,	\
+				parsing				\
+			))
 OBJS	= ${SRCS:.cpp=.o} ${CLAS:.cpp=.o}
+BOBJS	= ${BONUS:.cpp=.o} ${CLAS:.cpp=.o}
 DEPS	= ${OBJS:.o=.d}
+BDEPS	= ${BOBJS:.o=.d}
 RM		:= rm -rf
 RED		:= \033[1;31m
 NC		:= \033[0m
@@ -50,12 +66,15 @@ CYAN	:= \033[1;36m
 
 ${NAME}: ${OBJS}
 	@${CC} ${FLAGS} ${OBJS} ${INCL} -o $@ 
-	@echo "${LGREEN}Successfully created${NC}${CYAN} ${NAME}${NC}${LGREEN}!${NC}"
+	@echo "${LGREEN}Successfully created ${NC}${CYAN}${NAME}${NC}${LGREEN}!${NC}"
 
 all: ${NAME}
 
+bonus: ${BOBJS}
+	@${CC} ${FLAGS} ${BOBJS} ${INCL} -o $@ 
+	@echo "${LGREEN}Successfully created ${NC}${CYAN}Tosser${NC}${LGREEN}!${NC}"
+
 test: re 
-	@valgrind --track-fds=yes ./${NAME} 6667 Victor
 	@make fclean
 
 clean:
@@ -70,4 +89,4 @@ re: fclean all
 
 -include ${DEPS}
 
-.PHONY: all clean fclean re test
+.PHONY: all clean fclean re test bonus

@@ -1,5 +1,5 @@
-#ifndef IRC_HPP
-# define IRC_HPP
+#ifndef BOT_HPP
+# define BOT_HPP
 # include <iostream>
 # include <string>
 # include <map>
@@ -65,8 +65,6 @@ typedef struct s_data
         vector<int>		open_fds;
         t_channels		channels;
 }						t_data;
-
-extern t_data	*g_data_ptr;
 
 /******************************************************************************/
 /*																		      */
