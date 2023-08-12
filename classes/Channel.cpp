@@ -13,6 +13,11 @@ Channel::Channel()
 	std::cout << "Default Channel constructor called" << std::endl;
 }
 
+Channel::Channel(const std::string name): _name(name)
+{
+	std::cout << "Channel Name constructor called" << std::endl;
+}
+
 Channel::Channel(const Channel &obj)
 {
 	(void)obj;

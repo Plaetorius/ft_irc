@@ -19,6 +19,7 @@ class Channel
 		void		add_users_to_invited(void);
 	public:
 		Channel();
+		Channel(const std::string name);
 		Channel(const  Channel &obj);
 		Channel& operator=(const Channel &rhs);
 		~Channel();

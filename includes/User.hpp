@@ -1,6 +1,8 @@
 #ifndef USER_H
 # define USER_H
+
 # include <string>
+# include <set>
 # include <iostream>
 # include "IRC.hpp"
 # include "Channel.hpp"
@@ -14,7 +16,8 @@ class User
 		string	_nick, _user, _name;
 		bool	_has_password, _has_nick, _has_user;
 		bool	_is_operator, _is_identified;
-		vector<Channel>	_channels;
+		set<Channel *>	_channels;
+		
 		list<t_command> _commands;
 
 	public:

@@ -1,5 +1,5 @@
-#ifndef MESSAGES2_HPP
-# define MESSAGES2_HPP
+#ifndef MESSAGES_HPP
+# define MESSAGES_HPP
 
 /*  General messages    */
 # define    RPL_WELCOME(client, nick, user, port) (client + " :Welcome to the " + port + " Network, " + nick + "[!" + user + "@" + LOCAL_HOST + "]/r/n")
@@ -19,5 +19,10 @@
 
 /*  Oper messages   */
 # define    RPL_YOUREOPER(client) (client + " :You are now an IRC operator")
+
+/*  Channel messages    */
+# define    ERR_BADCHANMASK(channel) ("476 :" + channel + " :Bad Channel Mask")
+# define    ERR_INVITEONLYCHAN(client, channel) ("473 :" + client + " " + channel + " :Cannot join channel (+i)")
+# define    ERR_NOSUCHCHANNEL(client, channel) ("403 :" + client + " " + channel + " :No such channel")
 
 #endif

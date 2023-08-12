@@ -1,5 +1,5 @@
 #include "User.hpp"
-#include "messages.hpp"
+#include "messages2.hpp"
 #include <sstream>
 #include <ctype.h>
 
@@ -87,7 +87,6 @@ bool	User::command_NICK(t_command &command)
     }
 
     /*  Check consecutive */
-	//TODO use iterator
     for (size_t i = 1; i < param.length(); ++i)
     {
         char ch = param[i];
@@ -102,7 +101,6 @@ bool	User::command_NICK(t_command &command)
     /*  ********************************************************************* */
                     /*  Check if the nick already exists    */
     /*  ********************************************************************* */
-	//TODO use iterator
     for (int i = 0; i < g_data_ptr->open_fds.size(); i++)
     {
         if (g_data_ptr->users[g_data_ptr->open_fds[i]]->get_nick() == param)
@@ -120,7 +118,6 @@ bool	User::command_NICK(t_command &command)
     /*  ********************************************************************* */
     if (this->_has_nick)
     {
-		//TODO use iterator
         for (int i = 0; i < g_data_ptr->open_fds.size(); i++)
         {
             User    *user = g_data_ptr->users[g_data_ptr->open_fds[i]];
@@ -186,52 +183,76 @@ bool	User::command_USER(t_command &command)
 	return true;
 }
 
+/**
+ * @brief 	check if the server connection is still connected 
+ * 
+ * @link	https://modern.ircdocs.horse/#ping-message 
+ */
 bool	User::command_PING(t_command &command)
 {
+	/*	********************************************************************* */
+					/*	Check the number of parameters	*/
+	/*	********************************************************************* */
+	if (command.parameters.size() == 0) {
+		send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "PING"));
+		return false;
+	}
 
+	/*	********************************************************************* */
+						/*	Answer to the request	*/
+	/*	********************************************************************* */
+	if (_is_identified == false)
+		send_message("PING :" + command.parameters.front() + "\r\n");
+	else
+		send_message("PONG :" + command.parameters.front() + "\r\n");
+	return true;
 }
 
-bool	User::command_JOIN(t_command &command)
+/**
+ * @brief	 obtain IRC operator privileges
+ * 
+ * @link	https://modern.ircdocs.horse/#oper-message
+ */
+bool	User::command_OPER(t_command &command)
 {
+	/*	********************************************************************* */
+							/*	Basic checks	*/
+	/*	********************************************************************* */
+	if (_is_identified == false) {
+		send_message(PERMISSIONDENIED);
+		return false;
+	}
+	if (command.parameters.size() < 2) {
+		send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "JOIN"));
+		return false;
+	}
 
+	/*	********************************************************************* */
+						/*	Check the user and password	*/
+	/*	********************************************************************* */
+	if (command.parameters.back() != PASSWORD)
+	{
+		send_message(ERR_PASSWDMISMATCH(int_to_string(_id)));
+		return false;
+	}
+
+	send_message(RPL_YOUREOPER(int_to_string(this->_id)));
+	this->_is_operator = true;
+	return true;
 }
 
-bool	User::command_PRIVMSG(t_command &command)
-{
-
-}
-
-bool	User::command_QUIT(t_command &command)
-{
-
-}
-
-bool	User::command_PART(t_command &command)
-{
-
-}
-
-bool	User::command_KICK(t_command &command)
-{
-
-}
-
+/**
+ * @brief   close the connection between a given client and the server
+ * 
+ * 
+ */
 int		User::command_KILL(t_command &command)
 {
 
 }
 
-bool	User::command_OPER(t_command &command)
-{
 
-}
-
-bool	User::command_MODE(t_command &command)
-{
-
-}
-
-bool	User::command_TOPIC(t_command &command)
+bool	User::command_PRIVMSG(t_command &command)
 {
 
 }
@@ -241,7 +262,4 @@ bool	User::command_NOTICE(t_command &command)
 
 }
 
-bool	User::command_INVITE(t_command &command)
-{
 
-}
