@@ -255,18 +255,25 @@ bool	User::command_KICK(t_command &command)
 }
 
 /**
- * @brief	Channel command
+ * @brief	set or remove options (or modes) from a given target
  * 
+ * @example	<target> [<modestring> [<mode arguments>...]]
+ * 
+ * @attention	The User mode has only +o mode
+ * @attention	The channel mode has +i, 
  */
 bool	User::command_MODE(t_command &command)
 {
 	std::cout << "Salut, Je m'appelle MODE Command" << std::endl;
 	return true;
+
+	/*	Just the values	*/
 }
 
 bool	User::command_QUIT(t_command &command)
 {
 	std::cout << "Salut, Je m'appelle QUIT Command" << std::endl;
 	return true;
-}
 
+	/*	Same as deconnection	*/
+}

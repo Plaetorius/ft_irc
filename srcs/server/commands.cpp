@@ -251,7 +251,6 @@ int		User::command_KILL(t_command &command)
 
 }
 
-
 bool	User::command_PRIVMSG(t_command &command)
 {
 
