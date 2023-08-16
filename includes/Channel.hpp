@@ -19,17 +19,16 @@ class Channel
 		void		add_users_to_invited(void);
 	public:
 		Channel();
-		Channel(const  Channel &obj);
-		Channel& operator=(const Channel &rhs);
 		~Channel();
 		
-		int			add_user(int fd_user, t_data &data);
-		int			kick_user(int emitter_fd, int to_kick_fd, string message, t_data &data);
-		int			op_user(int fd_emitter, int fd_to_op, t_data &data);
-		int			invite_user(int fd_emitter, int fd_to_invite, t_data &data);
+		int				add_user(int fd_user, t_data &data);
+		int				kick_user(int emitter_fd, int to_kick_fd, string message, t_data &data);
+		int				op_user(int fd_emitter, int fd_to_op, t_data &data);
+		int				invite_user(int fd_emitter, int fd_to_invite, t_data &data);
+		int				part(int fd_emitter, t_data &data);
 	
-		int			set_invite_only(bool mode, int fd_emitter);
-		int			set_topic(string topic, int fd_emitter, t_data &data); //LATER maybe change to reference
+		int				set_invite_only(bool mode, int fd_emitter);
+		int				set_topic(string topic, int fd_emitter, t_data &data); //LATER maybe change to reference
 
 		string			get_name(void) const;
 		vector<int>		get_users(void) const;

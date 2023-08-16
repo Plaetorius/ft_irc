@@ -109,8 +109,8 @@ int	Channel::add_user(int fd_user, t_data &data)
 		return 1; //"Invalid user tries to join the channel "
 	if (this->get_invite_only() == true && is_invited(fd_user) == false)
 		return 2; //User not invited && channel is invite-only
-	if (this->_fds_users.empty())
-		this->_fds_ops.push_back(fd_user);
+	// if (this->_fds_users.empty())
+	// 	this->_fds_ops.push_back(fd_user);
 	this->_fds_users.push_back(fd_user);
 	this->broadcast(data.users.at(fd_user)->get_nick() + " joined the channel!", fd_user);
 	return 0;
@@ -124,6 +124,7 @@ int	Channel::kick_user(int fd_emitter, int fd_to_kick, string message, t_data &d
 		return 2; //"You can't kick yourself"
 	if (is_user(fd_to_kick) == false)
 		return 3; // "User doesn't exist"
+	//TODO if Channel is empty, delete the Channel
 	this->_fds_users.erase(find(this->_fds_users.begin(), this->_fds_users.end(), fd_to_kick));
 	message = trim_spaces(message);
 	if (message.empty())
@@ -167,6 +168,15 @@ int	Channel::invite_user(int fd_emitter, int fd_to_invite, t_data &data)
 	write(fd_to_invite, message.c_str(), message.size());
 	return 0;
 }
+
+// int	Channel::part()
+// {
+
+// }
+
+// int Channel::part 	//TODO if Channel is empty, delete the Channel
+
+//TODO Construtor with the name of the Channel and the fd of the creator, add creator to OPs, add Channel to Channels in t_data
 
 /******************************************************************************/
 /*																		      */
