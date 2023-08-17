@@ -1,5 +1,6 @@
 #include "User.hpp"
-#include "messages2.hpp"
+#include "Channel.hpp"
+#include "messages.hpp"
 #include <sstream>
 #include <ctype.h>
 
@@ -241,6 +242,79 @@ bool	User::command_OPER(t_command &command)
 	return true;
 }
 
+
+
+/**
+ * @brief	Channel command
+ * 
+ * @link    https://modern.ircdocs.horse/#channel-operations
+ * 
+ * @attention   The code allow to add only 1 channel at a time
+ * @attention   The code doesn't support password for joining channel
+ * @attention	The code don't handle TOOMANYCHANNELS, BANNEDFROMCHAN, CHANNELISFULL
+ */
+bool	User::command_JOIN(t_command &command)
+{
+	std::cout << "Salut, Je m'appelle JOIN Command" << std::endl;
+	return true;
+    /*  ********************************************************************* */
+                                /*  Basic checks  */
+    /*  ********************************************************************* */
+	if (_is_identified == false) {
+		send_message(PERMISSIONDENIED);
+		return false;
+	}
+	if (command.parameters.size() == 0) {
+		send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "JOIN"));
+		return false;
+	}
+
+    // Check for proper name
+	string	myParam = command.parameters.front();
+    if (myParam[0] != '#') {
+        send_message(ERR_BADCHANMASK(myParam));
+        return false;
+    }
+
+    /*  After joining the channel   */
+    /*
+        While a client is joined to a channel, they receive all relevant information 
+        about that channel including the JOIN, PART, KICK, and MODE messages affecting 
+        the channel. They receive all PRIVMSG and NOTICE messages sent to the channel, 
+        and they also receive QUIT messages from other clients joined to the same 
+        channel (to let them know those users have left the channel and the network). 
+        This allows them to keep track of other channel members and channel modes.
+    */
+
+   	/*	Check if the channel exists	*/
+    t_channels::iterator it = g_data_ptr->channels.find(myParam);
+    if (it != g_data_ptr->channels.end())
+	{
+		Channel *myChannel = g_data_ptr->channels.at(myParam); 
+		if (myChannel->get_invite_only() == true)
+		{
+			send_message(ERR_INVITEONLYCHAN(int_to_string(_id), myParam));
+			return false;
+		}
+		myChannel->add_user(_fd, *g_data_ptr);
+		this->_channels.insert(myChannel);
+	}
+	else if (_is_operator == true)
+	{
+		Channel *newChannel = new Channel(myParam);
+		g_data_ptr->channels[myParam] = newChannel;
+		newChannel->add_user(_fd, *g_data_ptr);
+		this->_channels.insert(newChannel);
+	}
+	else
+	{
+		send_message(ERR_NOSUCHCHANNEL(int_to_string(_id), myParam));
+		return false;	
+	}
+	return true;
+}
+
+
 /**
  * @brief   close the connection between a given client and the server
  * 
@@ -248,17 +322,175 @@ bool	User::command_OPER(t_command &command)
  */
 int		User::command_KILL(t_command &command)
 {
+    /*  Basic tests */
+        /*  is identified   */
+        /*  param is empty  */
+        /*  is operator */
 
+    /*  If target user doesn't exist    */
+        /*  error NOSUCHNICK    */
+
+    /*  iterate through the groups  */
+        /*  Notify that the user was killed */
+
+    /*  Send a message to the client that he was killed */
+
+    /*  return the fd of the user   */
 }
 
+
+/**
+ * @brief 
+ * 
+ * @param command 
+ * @return true 
+ * @return false 
+ */
+bool	User::command_QUIT(t_command &command)
+{
+	std::cout << "Salut, Je m'appelle QUIT Command" << std::endl;
+	return true;
+
+	/*	Same as KILL	*/
+}
+
+/**
+ * @brief   send private messages between users
+ * 
+ * @param   <receiver>{,<receiver>} <text to be sent> 
+ * @example PRIVMSG Angel :yes I'm receiving it !       ; Command to send a message to Angel.
+ * @example PRIVMSG %#bunny :Hi! I have a problem!      ; Command to send a message to halfops and chanops on #bunny.
+ * 
+ * @link        https://modern.ircdocs.horse/#privmsg-message 
+ * @attention   In general, the irc handles privmsg to users with specific
+ *              host mask and server mask. This things wasn't integrated 
+ *              in the code. But channel mask were handled
+ * @attention   I didn't handle the wildcards
+ * 
+ * @bug         Do I need to handle the banned from channel cases?
+ */
 bool	User::command_PRIVMSG(t_command &command)
 {
+    /*  Basic tests */
+    if (_is_identified == false) {
+		send_message(PERMISSIONDENIED);
+		return false;
+	}
+	if (command.parameters.size() < 2) {
+		send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "PRIVMSG"));
+		return false;
+	}
 
+    std::string param_str = command.parameters.front();
+
+    /*  if param is channel */
+    if (param_str[0] == '#')
+    {
+        Channel *myChannel = getChannel(param_str.substr(1));
+
+        /*  If channel doesn't exist    */ /* Error */
+        if (!myChannel)
+       		send_message(ERR_NOSUCHCHANNEL(int_to_string(_id), param_str));
+
+        /*  Broadcast to everybody  */
+        myChannel->broadcast(command.last_param, _fd);
+    }
+    /*  else param is user  */
+    else
+    {
+        /*  If the target user doesn't exist */
+        User    *myUser = getUser(param_str);         // This one is not a proper way
+
+        if (!myUser) {
+            send_message(ERR_NOSUCHNICK(param_str));            
+        }
+
+        /*  Send the message    */
+        myUser->send_message(PRIVMSG(_nick, command.last_param));
+    }
+    return true;
 }
 
+/**
+ * @brief   send notices between users and to channels
+ *          Difference is that there are no automatic replies
+ * 
+ * @param   <target>{,<target>} <text to be sent>
+ *  
+ */
 bool	User::command_NOTICE(t_command &command)
 {
+    /*  Basic tests */
+    if (_is_identified == false) {
+		send_message(PERMISSIONDENIED);
+		return false;
+	}
+	if (command.parameters.size() < 2) {
+		send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "PRIVMSG"));
+		return false;
+	}
 
+    std::string param_str = command.parameters.front();
+
+    /*  if param is channel */
+    if (param_str[0] == '#')
+    {
+        Channel *myChannel = getChannel(param_str.substr(1));
+
+        /*  If channel doesn't exist    */ /* Error */
+        if (!myChannel)
+       		send_message(ERR_NOSUCHCHANNEL(int_to_string(_id), param_str));
+
+        /*  Broadcast to everybody  */
+        myChannel->broadcast(command.last_param, _fd);
+    }
+    /*  else param is user  */
+    else
+    {
+        /*  If the target user doesn't exist */
+        User    *myUser = getUser(param_str);         // This one is not a proper way
+
+        if (!myUser) {
+            send_message(ERR_NOSUCHNICK(param_str));            
+        }
+
+        /*  Send the message    */
+        myUser->send_message(PRIVMSG(_nick, command.last_param));
+    }
+    return true;
 }
 
 
+
+
+/*  Helper functions    */
+Channel *getChannel(std::string name)
+{
+    Channel *myChannel;
+
+    try
+    {
+        myChannel = g_data_ptr->channels.at(name);
+    }
+    catch(const std::exception& e)
+    {
+        myChannel = NULL;
+    }
+    return (myChannel);
+}
+
+User *getUser(std::string nick)
+{
+    User *myUser;
+
+    std::vector<int>::iterator user_begin = g_data_ptr->open_fds.begin();
+    std::vector<int>::iterator user_end = g_data_ptr->open_fds.end();
+    while (user_begin != user_end)
+    {
+        myUser = g_data_ptr->users.at(*user_begin);
+        if (nick.compare(myUser->get_nick()))
+            return (myUser);
+        user_begin++;
+    }
+    return (NULL);
+}
