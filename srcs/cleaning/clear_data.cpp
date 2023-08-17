@@ -13,14 +13,19 @@ void	clear_data(t_data &data)
 		close(data.epoll.fd);
 		data.epoll.fd = -1;
 	}
-	map<int, User *>::iterator it_users = data.users.begin();
-	map<int, User *>::iterator ite_users = data.users.end();
+	t_users::iterator it_users = data.users.begin();
+	t_users::iterator ite_users = data.users.end();
 	for (; it_users != ite_users; it_users++)
 		delete	it_users->second;
 	vector<int>::iterator  it_open_fds = data.open_fds.begin();
 	vector<int>::iterator  ite_open_fds = data.open_fds.end();
 	for (; it_open_fds != ite_open_fds; it_open_fds++)
 		close(*it_open_fds);
+	t_channels::iterator it_channels = data.channels.begin();
+	t_channels::iterator ite_channels = data.channels.end();
+	for (; it_channels != ite_channels; it_channels++)
+		delete it_channels->second;
+	data.channels.clear();
 	data.users.clear();
 	data.open_fds.~vector();
 }

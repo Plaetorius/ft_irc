@@ -242,79 +242,6 @@ bool	User::command_OPER(t_command &command)
 	return true;
 }
 
-
-
-/**
- * @brief	Channel command
- * 
- * @link    https://modern.ircdocs.horse/#channel-operations
- * 
- * @attention   The code allow to add only 1 channel at a time
- * @attention   The code doesn't support password for joining channel
- * @attention	The code don't handle TOOMANYCHANNELS, BANNEDFROMCHAN, CHANNELISFULL
- */
-bool	User::command_JOIN(t_command &command)
-{
-	std::cout << "Salut, Je m'appelle JOIN Command" << std::endl;
-	return true;
-    /*  ********************************************************************* */
-                                /*  Basic checks  */
-    /*  ********************************************************************* */
-	if (_is_identified == false) {
-		send_message(PERMISSIONDENIED);
-		return false;
-	}
-	if (command.parameters.size() == 0) {
-		send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "JOIN"));
-		return false;
-	}
-
-    // Check for proper name
-	string	myParam = command.parameters.front();
-    if (myParam[0] != '#') {
-        send_message(ERR_BADCHANMASK(myParam));
-        return false;
-    }
-
-    /*  After joining the channel   */
-    /*
-        While a client is joined to a channel, they receive all relevant information 
-        about that channel including the JOIN, PART, KICK, and MODE messages affecting 
-        the channel. They receive all PRIVMSG and NOTICE messages sent to the channel, 
-        and they also receive QUIT messages from other clients joined to the same 
-        channel (to let them know those users have left the channel and the network). 
-        This allows them to keep track of other channel members and channel modes.
-    */
-
-   	/*	Check if the channel exists	*/
-    t_channels::iterator it = g_data_ptr->channels.find(myParam);
-    if (it != g_data_ptr->channels.end())
-	{
-		Channel *myChannel = g_data_ptr->channels.at(myParam); 
-		if (myChannel->get_invite_only() == true)
-		{
-			send_message(ERR_INVITEONLYCHAN(int_to_string(_id), myParam));
-			return false;
-		}
-		myChannel->add_user(_fd, *g_data_ptr);
-		this->_channels.insert(myChannel);
-	}
-	else if (_is_operator == true)
-	{
-		Channel *newChannel = new Channel(myParam);
-		g_data_ptr->channels[myParam] = newChannel;
-		newChannel->add_user(_fd, *g_data_ptr);
-		this->_channels.insert(newChannel);
-	}
-	else
-	{
-		send_message(ERR_NOSUCHCHANNEL(int_to_string(_id), myParam));
-		return false;	
-	}
-	return true;
-}
-
-
 /**
  * @brief   close the connection between a given client and the server
  * 
@@ -393,7 +320,7 @@ bool	User::command_PRIVMSG(t_command &command)
        		send_message(ERR_NOSUCHCHANNEL(int_to_string(_id), param_str));
 
         /*  Broadcast to everybody  */
-        myChannel->broadcast(command.last_param, _fd);
+        myChannel->broadcast(command.last_param);
     }
     /*  else param is user  */
     else
@@ -442,7 +369,7 @@ bool	User::command_NOTICE(t_command &command)
        		send_message(ERR_NOSUCHCHANNEL(int_to_string(_id), param_str));
 
         /*  Broadcast to everybody  */
-        myChannel->broadcast(command.last_param, _fd);
+        myChannel->broadcast(command.last_param);
     }
     /*  else param is user  */
     else
