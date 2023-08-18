@@ -1,5 +1,7 @@
 {
 	"files.associations": {
+		"*.c": "c",
+		"*.h": "c",
 		"iostream": "cpp",
 		"ostream": "cpp",
 		"numbers": "cpp",
@@ -7,6 +9,7 @@
 		"string": "cpp",
 		"unordered_map": "cpp",
 		"string_view": "cpp",
-		"ranges": "cpp"
+		"ranges": "cpp",
+		"typeinfo": "cpp"
 	}
 }

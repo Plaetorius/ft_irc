@@ -26,6 +26,7 @@ SRCS	=	$(addsuffix .cpp,		\
 			$(addprefix utils/,		\
 				find_user_fd		\
 				int_to_string		\
+				string_to_int		\
 				trim_spaces			\
 				nick_to_fd			\
 			)))

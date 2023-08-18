@@ -29,25 +29,21 @@ void	User::push_back_command(t_command &command)
 	this->_commands.push_back(command);
 }
 
-/*
-	execute_commands() will execute all the commands in the list of the user
-*/
-void	User::execute_commands()
+
+bool    User::send_message(const string &message)
 {
-	cout << "============================================" << endl << "Start execute commands" << endl <<  "============================================" << endl;
-	while (this->_commands.empty() == false)
-	{
-		cout << this->_commands.front().command << endl;
-		this->_commands.pop_front(); 
-	}
-	cout << "============================================" << endl << "End execute commands" << endl <<  "============================================" << endl;
+    if (write(this->_fd, message.c_str(), message.length()) < 1)
+		return false;
+
+	cout << "\033[96m" << this->_id << " > " << message << "\033[0m";
+	return true;
 }
 
 
 /*	************************************************************************* */
 						/*	Static functions	*/
 /*	************************************************************************* */
-static User *getUser(std::string nick, t_data *server)
+User *User::getUser(std::string nick, t_data *server)
 {
     User *myUser;
 
@@ -61,6 +57,17 @@ static User *getUser(std::string nick, t_data *server)
         user_begin++;
     }
     return (NULL);
+}
+
+bool    User::is_operator(void)
+{
+    vector<int>  operators;
+
+    operators = this->server->operator_fds; 
+
+    if (std::find(operators.begin(), operators.end(), _fd) != operators.end())
+        return true;
+    return false;
 }
 
 

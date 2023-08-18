@@ -30,6 +30,8 @@ using namespace std;
 # define LOCAL_HOST "127.0.0.1"
 # define READ_SIZE	512 			//Max message size. 510 "usable characters". 2 last ones MUST be \r\n
 # define DEBUG false
+# define	LOGIN "login"
+# define    PASSWORD "password"
 
 typedef map<int, User*> 		t_users; 	//Users will be mapped key: fd; User*: User corresponding to the fd
 typedef map<string, Channel *>	t_channels; //Key: channel name; Channel*: corresponding Channel
@@ -115,6 +117,7 @@ void		clear_data_exit(t_data &data, string message, int err_code);
 /******************************************************************************/
 int			find_user_fd(int fd, t_data &data);
 string		int_to_string(int n);
+int			string_to_int(string &number);
 string		trim_spaces(const string &to_trim);
 int			nick_to_fd(string &nick, t_data &data);
 

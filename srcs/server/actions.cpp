@@ -61,6 +61,69 @@ static void	user_disconnection(t_data &data, int fd)
 	cout << "User " << id_disc_user << " disconnected :(" << endl;
 }
 
+/*
+	execute_commands() will execute all the commands in the list of the user
+*/
+void	execute_commands(t_command &command, User *user)
+{
+	cout << "============================================" << endl << "Start execute commands" << endl <<  "============================================" << endl;
+	// while (this->_commands.empty() == false)
+	// {
+	// 	cout << this->_commands.front().command << endl;
+	// 	this->_commands.pop_front(); 
+	// }
+    bool    result;
+    int     quit_fd;
+
+    if (command.command == "PASS") {
+        result = user->command_PASS(command);
+    } else if (command.command == "NICK") {
+        result = user->command_NICK(command);
+    } else if (command.command == "USER") {
+        result = user->command_USER(command);
+    } else if (command.command == "PING") {
+        result = user->command_PING(command);
+    } else if (command.command == "JOIN") {
+        result = user->command_JOIN(command);
+    } else if (command.command == "NAMES") {
+        result = user->command_names(command);
+    } else if (command.command == "PRIVMSG") {
+        result = user->command_PRIVMSG(command);
+    } 
+	else if (command.command == "QUIT")
+	{
+        quit_fd = user->command_QUIT(command);
+        delete user;
+        g_data_ptr->open_fds.erase(find(g_data_ptr->open_fds.begin(), g_data_ptr->open_fds.end(), quit_fd));
+        user_disconnection(*g_data_ptr, quit_fd);
+    } 
+	else if (command.command == "KILL")
+	{
+        quit_fd = user->command_KILL(command);
+        delete g_data_ptr->users[quit_fd];
+        g_data_ptr->open_fds.erase(find(g_data_ptr->open_fds.begin(), g_data_ptr->open_fds.end(), quit_fd));
+		user_disconnection(*g_data_ptr, quit_fd);
+    } else if (command.command == "PART") {
+        result = user->command_PART(command);
+    } else if (command.command == "KICK") {
+        result = user->command_KICK(command);
+    } else if (command.command == "OPER") {
+        result = user->command_OPER(command);
+    } else if (command.command == "MODE") {
+        result = user->command_MODE(command);
+    } else if (command.command == "TOPIC") {
+        result = user->command_TOPIC(command);
+    } else if (command.command == "NOTICE") {
+        result = user->command_NOTICE(command);
+    } else if (command.command == "INVITE") {
+        result = user->command_INVITE(command);
+    } else {
+        return ;
+    }
+
+	cout << "============================================" << endl << "End execute commands" << endl <<  "============================================" << endl;
+}
+
 static void	user_command(int user_fd, t_data &data)
 {
 	string	raw_input = read_raw_input(user_fd, data);
@@ -136,7 +199,11 @@ static void	user_command(int user_fd, t_data &data)
 			raw_input.clear();
 		data.users[user_fd]->push_back_command(command);
 	}
-	data.users[user_fd]->execute_commands();
+	if (command.command.size() == 0) {
+        data.users[user_fd]->send_message("Where is my command, frere?!\r\n");
+        return ;
+    }
+	execute_commands(command, data.users[user_fd]);
 }
 
 /*

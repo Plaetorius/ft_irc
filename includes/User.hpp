@@ -1,5 +1,5 @@
-#ifndef USER_H
-# define USER_H
+#ifndef USER_HPP
+# define USER_HPP
 
 # include <string>
 # include <set>
@@ -38,16 +38,17 @@ class User
 		bool	send_message(const string &message);
 
 		/*	command	handler	*/
-		void	execute_commands();
+		void	execute_commands(t_command &command);
 
-		bool	command_PASS(t_command &command, string const& password);
+		bool	command_PASS(t_command &command);
 		bool	command_NICK(t_command &command);
 		bool	command_USER(t_command &command);
 
 		bool	command_PING(t_command &command);
 		bool	command_JOIN(t_command &command);
+		bool	command_names(t_command &command);
 		bool	command_PRIVMSG(t_command &command);
-		bool	command_QUIT(t_command &command);
+		int		command_QUIT(t_command &command);
 		bool	command_PART(t_command &command);
 		bool	command_KICK(t_command &command);
 		int		command_KILL(t_command &command);

@@ -4,15 +4,6 @@
 #include <sstream>
 #include <ctype.h>
 
-bool    User::send_message(const string &message)
-{
-    if (write(this->_fd, message.c_str(), message.length()) < 1)
-		return false;
-
-	cout << "\033[96m" << this->_id << " > " << message << "\033[0m";
-	return true;
-}
-
 /**
  * ****************************************************************************
  * @brief       send a password to the server during the connection process.
@@ -24,15 +15,15 @@ bool    User::send_message(const string &message)
  * @bug         I suppose, the password couldn't passes inside of last_param
  * ****************************************************************************
  */
-bool	User::command_PASS(t_command &command, string const& password)
+bool	User::command_PASS(t_command &command)
 {
     if (_has_password)
         send_message(ERR_ALREADYREGISTERED(int_to_string(_id)));
     else if (command.parameters.size() == 0)
         send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "PASS"));
-    else if (command.parameters.front() == password)
+    else if (command.parameters.front() == server->password)
         _has_password = true;
-    else if (command.parameters.front() != password)
+    else if (command.parameters.front() != server->password)
         send_message(ERR_PASSWDMISMATCH(int_to_string(_id)));
     else
         send_message("fatal");
@@ -212,6 +203,8 @@ bool	User::command_PING(t_command &command)
 /**
  * @brief	 obtain IRC operator privileges
  * 
+ * @param   <name> <password>
+ * 
  * @link	https://modern.ircdocs.horse/#oper-message
  */
 bool	User::command_OPER(t_command &command)
@@ -224,14 +217,14 @@ bool	User::command_OPER(t_command &command)
 		return false;
 	}
 	if (command.parameters.size() < 2) {
-		send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "JOIN"));
+		send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "OPER"));
 		return false;
 	}
 
 	/*	********************************************************************* */
 						/*	Check the user and password	*/
 	/*	********************************************************************* */
-	if (command.parameters.back() != PASSWORD)
+	if (command.parameters.front() != LOGIN || command.parameters.back() != PASSWORD)
 	{
 		send_message(ERR_PASSWDMISMATCH(int_to_string(_id)));
 		return false;
@@ -245,11 +238,21 @@ bool	User::command_OPER(t_command &command)
 /**
  * @brief   close the connection between a given client and the server
  * 
- * @param   <nickname> <comment>
+ * @param       <target nickname> <comment>
+ * @return      the fd of the target user
+ * 
+ * @link        https://modern.ircdocs.horse/#kill-message
+ * @attention   the user has to be deleted from the server side
  */
 int		User::command_KILL(t_command &command)
 {
-    /*  Basic tests */
+    User    *target_user;
+    string  target_nick;
+    bool    has_reason;
+
+    /*	********************************************************************* */
+                                /*  Basic tests */
+    /*	********************************************************************* */
     if (_is_identified == false) {
 		send_message(PERMISSIONDENIED);
 		return false;
@@ -263,47 +266,95 @@ int		User::command_KILL(t_command &command)
         return false;
     }
 
-
-    User    *target_user;
-    string  target_name;
-
-    target_name = command.parameters.front();
-    target_user = User::getUser(target_name, server);
+    /*	********************************************************************* */
+                /*  Get information about the target user   */
+    /*	********************************************************************* */
+    target_nick = command.parameters.front();
+    target_user = User::getUser(target_nick, server);
     if (target_user == NULL) {
-        send_message(ERR_NOSUCHNICK(target_name));
+        send_message(ERR_NOSUCHNICKCHANNEL(target_nick));
         return false;
     }
+    if (command.last_param.size() == 0)
+        has_reason = 0;
+    else
+        has_reason = 1;
 
+    /*	********************************************************************* */
+            /*  Go through the channels and remove the target user  */
+    /*	********************************************************************* */
     vector<Channel *>::iterator iter_beg = _channels.begin();
     vector<Channel *>::iterator iter_end = _channels.end();
     while (iter_beg != iter_end)
     {
-        (*iter_beg)->kick_user(_fd, target_user->get_fd(), )
+        Channel *myChannel = *iter_beg;
+
+        myChannel->kick_user(target_user->get_fd());
+        if (myChannel->get_users().size() != 0)
+        {
+            if (has_reason == 1)
+                myChannel->broadcast(QUIT_WREASON(target_nick, command.last_param));
+            else
+                myChannel->broadcast(QUIT_WOREASON(target_nick));
+        }
+        else    // No more users left in the channel
+        {
+            this->_channels.erase(iter_beg);
+            this->server->channels.erase(myChannel->get_name());
+            delete myChannel;
+        }
         iter_beg++;
     }
-    /*  iterate through the groups  */
-        /*  Notify that the user was killed */
 
-    /*  Send a message to the client that he was killed */  
-    /*KILL message avec source*/
+    /*	********************************************************************* */
+                    /*  Notify the user that he was killed  */
+    /*	********************************************************************* */
+    if (has_reason == true)
+        target_user->send_message(KILL_WREASON(_nick, command.last_param));
+    else
+        target_user->send_message(KILL_WOREASON(_nick));
 
-    /*  return the fd of the user   */
+    // this->server->open_fds.erase(find(server->open_fds.begin(), server->open_fds.end(), target_user->get_fd()));
+    return (target_user->get_fd());
 }
 
-
 /**
- * @brief 
+ * @brief       quit the server
  * 
- * @param command 
- * @return true 
- * @return false 
+ * @param       [<reason>]
+ * @return      the fd of a user
+ * 
+ * @link        https://modern.ircdocs.horse/#quit-message
  */
-bool	User::command_QUIT(t_command &command)
+int     User::command_QUIT(t_command &command)
 {
-	std::cout << "Salut, Je m'appelle QUIT Command" << std::endl;
-	return true;
+    /*	********************************************************************* */
+            /*  Go through the channels and remove the target user  */
+    /*	********************************************************************* */
+    vector<Channel *>::iterator iter_beg = _channels.begin();
+    vector<Channel *>::iterator iter_end = _channels.end();
+    while (iter_beg != iter_end)
+    {
+        Channel *myChannel = *iter_beg;
 
-	/*	Same as KILL	*/
+        myChannel->kick_user(_fd);
+        if (myChannel->get_users().size() != 0) // There is someone in the channel
+        {
+            if (command.last_param.size() != 0)
+                myChannel->broadcast(QUIT_WREASON(_nick, command.last_param));
+            else
+                myChannel->broadcast(QUIT_WOREASON(_nick));
+        }
+        else    // No more users left in the channel
+        {
+            this->_channels.erase(iter_beg);
+            this->server->channels.erase(myChannel->get_name());
+            delete myChannel;
+        }
+        iter_beg++;
+    }
+    // this->server->open_fds.erase(find(server->open_fds.begin(), server->open_fds.end(), _fd));
+    return (_fd);
 }
 
 /**
@@ -318,6 +369,7 @@ bool	User::command_QUIT(t_command &command)
  *              host mask and server mask. This things wasn't integrated 
  *              in the code. But channel mask were handled
  * @attention   I didn't handle the wildcards
+ * @attention   I didn't handle several users
  * 
  * @bug         Do I need to handle the banned from channel cases?
  */
@@ -328,7 +380,7 @@ bool	User::command_PRIVMSG(t_command &command)
 		send_message(PERMISSIONDENIED);
 		return false;
 	}
-	if (command.parameters.size() < 2) {
+	if (command.parameters.size() < 1) {
 		send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "PRIVMSG"));
 		return false;
 	}
@@ -338,23 +390,24 @@ bool	User::command_PRIVMSG(t_command &command)
     /*  if param is channel */
     if (param_str[0] == '#')
     {
-        Channel *myChannel = getChannel(param_str.substr(1));
+        Channel *myChannel = Channel::getChannel(param_str.substr(1));
 
         /*  If channel doesn't exist    */ /* Error */
         if (!myChannel)
        		send_message(ERR_NOSUCHCHANNEL(int_to_string(_id), param_str));
-
-        /*  Broadcast to everybody  */
-        myChannel->broadcast(command.last_param);
+        else
+            /*  Broadcast to everybody  */
+            myChannel->broadcast(command.last_param + "\r\n");
     }
     /*  else param is user  */
     else
     {
         /*  If the target user doesn't exist */
-        User    *myUser = User::getUser(param_str, server);         // This one is not a proper way
+        User    *myUser = User::getUser(param_str, server);
 
         if (!myUser) {
-            send_message(ERR_NOSUCHNICK(param_str));            
+            send_message(ERR_NOSUCHNICKCHANNEL(param_str));
+            return false;
         }
 
         /*  Send the message    */
@@ -364,11 +417,12 @@ bool	User::command_PRIVMSG(t_command &command)
 }
 
 /**
- * @brief   send notices between users and to channels
- *          Difference is that there are no automatic replies
+ * @brief   For our project is fully the same
  * 
  * @param   <target>{,<target>} <text to be sent>
- *  
+ * 
+ * @link        https://modern.ircdocs.horse/#notice-message
+ * @attention   I didn't handle several users
  */
 bool	User::command_NOTICE(t_command &command)
 {
@@ -387,14 +441,14 @@ bool	User::command_NOTICE(t_command &command)
     /*  if param is channel */
     if (param_str[0] == '#')
     {
-        Channel *myChannel = getChannel(param_str.substr(1));
+        Channel *myChannel = Channel::getChannel(param_str.substr(1));
 
         /*  If channel doesn't exist    */ /* Error */
         if (!myChannel)
        		send_message(ERR_NOSUCHCHANNEL(int_to_string(_id), param_str));
-
+            return false;
         /*  Broadcast to everybody  */
-        myChannel->broadcast(command.last_param);
+        myChannel->broadcast(command.last_param + "\r\n");
     }
     /*  else param is user  */
     else
@@ -403,41 +457,12 @@ bool	User::command_NOTICE(t_command &command)
         User    *myUser = User::getUser(param_str, server);         // This one is not a proper way
 
         if (!myUser) {
-            send_message(ERR_NOSUCHNICK(param_str));            
+            send_message(ERR_NOSUCHNICKCHANNEL(param_str));
+            return false;      
         }
-
+    
         /*  Send the message    */
         myUser->send_message(PRIVMSG(_nick, command.last_param));
     }
     return true;
-}
-
-
-
-
-/*  Helper functions    */
-Channel *getChannel(std::string name)
-{
-    Channel *myChannel;
-
-    try
-    {
-        myChannel = g_data_ptr->channels.at(name);
-    }
-    catch(const std::exception& e)
-    {
-        myChannel = NULL;
-    }
-    return (myChannel);
-}
-
-bool    User::is_operator(void)
-{
-    vector<int>  operators;
-
-    operators = this->server->operator_fds; 
-
-    if (std::find(operators.begin(), operators.end(), _fd) != operators.end())
-        return true;
-    return false;
 }
