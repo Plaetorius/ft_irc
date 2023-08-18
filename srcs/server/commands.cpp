@@ -238,29 +238,54 @@ bool	User::command_OPER(t_command &command)
 	}
 
 	send_message(RPL_YOUREOPER(int_to_string(this->_id)));
-	this->_is_operator = true;
+    server->operator_fds.push_back(_id);
 	return true;
 }
 
 /**
  * @brief   close the connection between a given client and the server
  * 
- * 
+ * @param   <nickname> <comment>
  */
 int		User::command_KILL(t_command &command)
 {
     /*  Basic tests */
-        /*  is identified   */
-        /*  param is empty  */
-        /*  is operator */
+    if (_is_identified == false) {
+		send_message(PERMISSIONDENIED);
+		return false;
+	}
+	if (command.parameters.size() < 1) {
+		send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "KILL"));
+		return false;
+	}
+    if (is_operator() == false) {
+        send_message(ERR_NOPRIVILEGES(_nick));
+        return false;
+    }
 
-    /*  If target user doesn't exist    */
-        /*  error NOSUCHNICK    */
 
+    User    *target_user;
+    string  target_name;
+
+    target_name = command.parameters.front();
+    target_user = User::getUser(target_name, server);
+    if (target_user == NULL) {
+        send_message(ERR_NOSUCHNICK(target_name));
+        return false;
+    }
+
+    vector<Channel *>::iterator iter_beg = _channels.begin();
+    vector<Channel *>::iterator iter_end = _channels.end();
+    while (iter_beg != iter_end)
+    {
+        (*iter_beg)->kick_user(_fd, target_user->get_fd(), )
+        iter_beg++;
+    }
     /*  iterate through the groups  */
         /*  Notify that the user was killed */
 
-    /*  Send a message to the client that he was killed */
+    /*  Send a message to the client that he was killed */  
+    /*KILL message avec source*/
 
     /*  return the fd of the user   */
 }
@@ -326,7 +351,7 @@ bool	User::command_PRIVMSG(t_command &command)
     else
     {
         /*  If the target user doesn't exist */
-        User    *myUser = getUser(param_str);         // This one is not a proper way
+        User    *myUser = User::getUser(param_str, server);         // This one is not a proper way
 
         if (!myUser) {
             send_message(ERR_NOSUCHNICK(param_str));            
@@ -375,7 +400,7 @@ bool	User::command_NOTICE(t_command &command)
     else
     {
         /*  If the target user doesn't exist */
-        User    *myUser = getUser(param_str);         // This one is not a proper way
+        User    *myUser = User::getUser(param_str, server);         // This one is not a proper way
 
         if (!myUser) {
             send_message(ERR_NOSUCHNICK(param_str));            
@@ -406,18 +431,13 @@ Channel *getChannel(std::string name)
     return (myChannel);
 }
 
-User *getUser(std::string nick)
+bool    User::is_operator(void)
 {
-    User *myUser;
+    vector<int>  operators;
 
-    std::vector<int>::iterator user_begin = g_data_ptr->open_fds.begin();
-    std::vector<int>::iterator user_end = g_data_ptr->open_fds.end();
-    while (user_begin != user_end)
-    {
-        myUser = g_data_ptr->users.at(*user_begin);
-        if (nick.compare(myUser->get_nick()))
-            return (myUser);
-        user_begin++;
-    }
-    return (NULL);
+    operators = this->server->operator_fds; 
+
+    if (std::find(operators.begin(), operators.end(), _fd) != operators.end())
+        return true;
+    return false;
 }

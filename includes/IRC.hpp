@@ -64,6 +64,7 @@ typedef struct s_data
         string			password;
         t_users			users;
         vector<int>		open_fds;
+		vector<int>		operator_fds;
         t_channels		channels;
 }						t_data;
 

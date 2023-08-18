@@ -17,6 +17,7 @@
 # define    ERR_NOSUCHNICK(nick) ("401 :" + nick + " : No such nick/r/n")
 // # define    PRIVMSG(nick, user, host, dest, str) (":" + nick + "!" + user + "@" + host + " PRIVMSG " + dest + " :" + str + "\r\n")
 # define    PRIVMSG(nick, string) (":" + nick + " PRIVMSG " + " :" + string + "\r\n")
+# define    ERR_NOPRIVILEGES(client) ("481 :" + client + " :Permission denied- You are not an IRC operator\r\n")
 
 /*  Oper messages   */
 # define    RPL_YOUREOPER(client) (client + " :You are now an IRC operator")

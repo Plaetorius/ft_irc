@@ -1,11 +1,11 @@
 #include "User.hpp"
 
-User::User()
+User::User(): server(g_data_ptr)
 {
 	cout << "Default User constructor called" << endl;
 }
 
-User::User(const User &obj)
+User::User(const User &obj): server(g_data_ptr)
 {
 	cout << "Copy User constructor called" << endl; //TODO
 	(void)obj;
@@ -42,6 +42,27 @@ void	User::execute_commands()
 	}
 	cout << "============================================" << endl << "End execute commands" << endl <<  "============================================" << endl;
 }
+
+
+/*	************************************************************************* */
+						/*	Static functions	*/
+/*	************************************************************************* */
+static User *getUser(std::string nick, t_data *server)
+{
+    User *myUser;
+
+    std::vector<int>::iterator user_begin = server->open_fds.begin();
+    std::vector<int>::iterator user_end = server->open_fds.end();
+    while (user_begin != user_end)
+    {
+        myUser = server->users.at(*user_begin);
+        if (nick.compare(myUser->get_nick()))
+            return (myUser);
+        user_begin++;
+    }
+    return (NULL);
+}
+
 
 /*
 				GETTERS

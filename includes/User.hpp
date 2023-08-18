@@ -3,6 +3,7 @@
 
 # include <string>
 # include <set>
+# include <vector>
 # include <iostream>
 # include "IRC.hpp"
 # include "Channel.hpp"
@@ -12,13 +13,17 @@ using namespace std;
 class User
 {
 	private:
+		/*	User info	*/
 		int		_id, _fd;
 		string	_nick, _user, _name;
-		bool	_has_password, _has_nick, _has_user;
-		bool	_is_operator, _is_identified;
-		set<Channel *>	_channels;
 		
-		list<t_command> _commands;
+		/*	Authentication level	*/
+		bool	_has_password, _has_nick, _has_user, _is_identified;
+		
+		/*	Pointers to the classes the user is in	*/
+		vector<Channel *>	_channels;
+		list<t_command>		_commands;
+		t_data				*server;
 
 	public:
 		/*	Constructors and Destructor	*/
@@ -34,9 +39,11 @@ class User
 
 		/*	command	handler	*/
 		void	execute_commands();
+
 		bool	command_PASS(t_command &command, string const& password);
 		bool	command_NICK(t_command &command);
 		bool	command_USER(t_command &command);
+
 		bool	command_PING(t_command &command);
 		bool	command_JOIN(t_command &command);
 		bool	command_PRIVMSG(t_command &command);
@@ -50,6 +57,11 @@ class User
 		bool	command_NOTICE(t_command &command);
 		bool	command_INVITE(t_command &command);
 
+
+		/*	Static function	*/
+		static User *getUser(std::string nick, t_data *server);
+
+
 		/*	Getters and Setters	*/
 		int		get_id(void) const;
 		int		get_fd(void) const;
@@ -57,6 +69,7 @@ class User
 		bool	get_identification(void) const;
 		void	set_id(int id);		//TODO remove ; for debug
 		void	set_fd(int fd);		//TODO remove ; for debug
+		bool    is_operator(void);
 };
 
 #endif
