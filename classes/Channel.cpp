@@ -13,8 +13,17 @@ Channel::Channel()
 	cout << "Default Channel constructor called" << endl;
 }
 
-Channel::Channel(string name, int fd_creator, t_data &data) : _name(name), _is_invite_only(false), _is_topic_set(false), _is_topic_protected(false), _is_channel_locked(false), _max_users(0), _has_user_limit(false) 
+/*
+	The parameter name MUST NOT be empty. It has to be checked in the JOIN command
+*/
+Channel::Channel(string name, int fd_creator, t_data &data) : _is_invite_only(false), _is_topic_set(false), _is_topic_protected(false), _is_channel_locked(false), _max_users(0), _has_user_limit(false) 
 {
+	// this->_name = name[0] == '#' ? name : "#" + name;
+	// this->_name = string("#", name[0] != '#') + name; 
+	if (name[0] == '#')
+		this->_name = name;
+	else
+		this->_name = "#" + name;
 	this->add_user(fd_creator, data);
 	cout << "Name, Fd Creator Channel Constructor called" << endl;
 }
@@ -135,7 +144,7 @@ bool	Channel::kick_user(int fd_emitter, int fd_to_kick, string message, t_data &
 	return true;
 }
 
-bool	Channel::part(int fd_user, t_data &data)
+bool	Channel::part(int fd_user, string message, t_data &data)
 {
 	//TODO if Channel becomes empty, delete the Channel
 	string message;
@@ -143,7 +152,7 @@ bool	Channel::part(int fd_user, t_data &data)
 	message = "You left #" + this->get_name() +"\n";
 	write(fd_user, message.c_str(), message.size());
 	this->_fds_users.erase(find(this->_fds_users.begin(), this->_fds_users.end(), fd_user));
-	this->broadcast(data.users.at(fd_user)->get_nick() + " left the channel!");
+	this->broadcast(data.users.at(fd_user)->get_nick() + " left the channel! Message: " + message);
 	return true;
 }
 
@@ -231,12 +240,15 @@ bool	Channel::set_invite_only(bool mode, int fd_emitter)
 	return true;
 }
 
-bool	Channel::set_topic(string &topic, int fd_emitter, t_data &data)
+bool	Channel::set_topic(string topic, int fd_emitter, t_data &data)
 {
 	if (this->_is_topic_protected && is_op(fd_emitter) == false)
 		return error_feedback(fd_emitter, "You are not channel operator"); 
 	this->_is_topic_set = true;
-	this->_topic = topic;
+	if (topic.empty() == true)
+		this->_topic.clear();
+	else
+		this->_topic = topic;
 	this->broadcast(data.users.at(fd_emitter)->get_nick() + " has changed topic to " + topic);
 	return true;
 }

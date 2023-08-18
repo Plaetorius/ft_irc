@@ -18,19 +18,20 @@ class Channel
 		bool			_is_channel_locked;
 		unsigned int	_max_users;
 		bool			_has_user_limit;
-		bool			is_user(int	fd_user);
-		bool			is_op(int fd_user);
-		bool			is_invited(int fd_user);
 		bool			error_feedback(int fd_emitter, string message);
 	public:
 		Channel();
 		Channel(string name, int fd_creator, t_data &data);
 		~Channel();
+
+		bool			is_user(int	fd_user);
+		bool			is_op(int fd_user);
+		bool			is_invited(int fd_user);
 		
 		bool			add_user(int fd_user, t_data &data);
 		bool			add_user(int fd_user, string &key, t_data &data);
 		bool			kick_user(int emitter_fd, int to_kick_fd, string message, t_data &data);
-		bool			part(int fd_user, t_data &data);
+		bool			part(int fd_user, string message, t_data &data);
 		bool			op_user(int fd_emitter, int fd_to_op, t_data &data);
 		bool			deop_user(int fd_emitter, int fd_to_deop, t_data &data);
 		bool			invite_user(int fd_emitter, int fd_to_invite, t_data &data);
@@ -38,7 +39,7 @@ class Channel
 		bool			disable_locked_mode(int fd_emitter, t_data &data);
 
 		bool			set_invite_only(bool mode, int fd_emitter);
-		bool			set_topic(string &topic, int fd_emitter, t_data &data);
+		bool			set_topic(string topic, int fd_emitter, t_data &data);
 		bool			set_protected_topic(bool mode, int fd_emitter, t_data &data);
 		bool			set_max_users(int max_users, int fd_emitter, t_data &data);
 		bool			set_has_user_limit(bool mode, int fd_emitter, t_data &data);

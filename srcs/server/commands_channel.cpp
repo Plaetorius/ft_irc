@@ -91,7 +91,26 @@ bool	User::command_TOPIC(t_command &command)
 							/*	General checks	*/
 	/*  ********************************************************************* */
 
-	/*	If not in channel	*/
+	if (_is_identified == false)
+	{
+		send_message(PERMISSIONDENIED);
+		return false;
+	}
+	if (command.parameters.size() == 0)
+	{
+		send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "TOPIC"));
+		return false;
+	}
+	string channel_name = command.parameters.front();
+	t_channels::iterator it = g_data_ptr->channels.find(channel_name);
+	if (it == g_data_ptr->channels.end())
+	{
+		send_message(ERR_NOSUCHCHANNEL(int_to_string(_id), channel_name));
+		return false;
+	}
+	Channel *channel = it->second;
+
+	/*TODO	If not in channel	*/
 
 		/*	ERR_NOTONCHANNEL	*/
 		/*	QUIT	*/
@@ -101,8 +120,18 @@ bool	User::command_TOPIC(t_command &command)
 							/*	Reading the topic	*/
 	/*  ********************************************************************* */
 
+	if (command.has_last_param = false)
+	{
+		if (channel->get_topic_set() == false)
+			send_message(RPL_NOTOPIC(_nick, _user, _name, channel_name));
+		else
+		{
+			send_message(RPL_TOPIC(_nick, _user, _name, channel_name, channel->get_topic()));
+			//TODO with Akadil send_message(RPL_TOPICWHOTIME())
+		}
+		return true;
+	}
 	/*	If <topic>	not given	*/
-
 		/*	if topic not set in channel	*/
 			/*	RPL_NOTOPIC	*/
 
@@ -116,6 +145,17 @@ bool	User::command_TOPIC(t_command &command)
 	/*  ********************************************************************* */
 							/*	Write the topic	*/
 	/*  ********************************************************************* */
+
+	else if (channel->get_topic_protected() == true && channel->is_op(_fd) == false)
+	{
+		send_message(ERR_CHANOPRIVSNEEDED(channel_name));
+		return false;
+	}
+	else if (command.last_param.empty() == true)
+	{
+		channel->set_topic("", _fd, *g_data_ptr);
+		return true;
+	}
 
 	/*	If protected mode and no permission	*/
 		/*	ERR_CHANOPRIVSNEEDED	*/
@@ -270,10 +310,3 @@ bool	User::command_MODE(t_command &command)
 	/*	Just the values	*/
 }
 
-bool	User::command_QUIT(t_command &command)
-{
-	std::cout << "Salut, Je m'appelle QUIT Command" << std::endl;
-	return true;
-
-	/*	Same as deconnection	*/
-}

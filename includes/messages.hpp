@@ -25,5 +25,9 @@
 # define    ERR_BADCHANMASK(channel) ("476 :" + channel + " :Bad Channel Mask")
 # define    ERR_INVITEONLYCHAN(client, channel) ("473 :" + client + " " + channel + " :Cannot join channel (+i)")
 # define    ERR_NOSUCHCHANNEL(client, channel) ("403 :" + client + " " + channel + " :No such channel")
+# define	ERR_CHANOPRIVSNEEDED(chan) ("482 :" + chan + " :You're not channel operator\r\n")
+# define	RPL_TOPIC(nick, user, name, chan, topic) ("332 :" + nick + "!" + user + "@" + name + " " + chan + " :" + topic + "\r\n")
+# define	RPL_NOTOPIC(nick, user, name, chan) ("331 :" + nick + "!" + user + "@" + name + " " + chan + " :No topic is set\r\n")
+# define 	RPL_TOPICWHOTIME(nick, chan, whoset, user, setat) ("333 :" + nick + " " + chan + " " + whoset + "!" + user + "@localhost " + setat + "\r\n")
 
 #endif

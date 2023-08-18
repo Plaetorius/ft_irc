@@ -2,6 +2,11 @@
 	"files.associations": {
 		"iostream": "cpp",
 		"ostream": "cpp",
-		"numbers": "cpp"
+		"numbers": "cpp",
+		"*.tcc": "cpp",
+		"string": "cpp",
+		"unordered_map": "cpp",
+		"string_view": "cpp",
+		"ranges": "cpp"
 	}
 }

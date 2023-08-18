@@ -66,7 +66,12 @@ t_command	parse_raw_input(string raw_input)
 				raw_input.clear();
 		}
 		if (raw_input.size() > 1 && raw_input[0] == ':')
+		{
 			result.last_param = raw_input.substr(1);
+			result.has_last_param = true;
+		}
+		else
+			result.has_last_param = false;
 	}
 	return result;
 }
