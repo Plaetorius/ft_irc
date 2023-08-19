@@ -65,8 +65,8 @@ bool	User::command_JOIN(t_command &command)
 			send_message(ERR_BADCHANNELKEY(_nick, channel_name));
 			return false;
 		}
-		channel->broadcast(JOIN(_nick, _user, "localhost",  channel_name));
 		channel->add_user(_fd);
+		channel->broadcast(JOIN(_nick, _user, "localhost",  channel_name), _fd);
 		if (channel->get_topic_set() == true)
 			send_message(RPL_TOPIC(_nick, _user, _name, channel_name, channel->get_topic()));
 		channel->print_names(_fd);
@@ -77,7 +77,7 @@ bool	User::command_JOIN(t_command &command)
 		send_message(CREATEDCHANNEL(channel_name));
 		g_data_ptr->channels[channel_name] = channel;
 		
-		channel->broadcast(JOIN(_nick, _user, "localhost", channel_name));
+		channel->broadcast(JOIN(_nick, _user, "localhost", channel_name), _fd);
 		// channel->add_user(_fd);
 		// send_message(RPL_TOPIC(_nick, _user, _name, channel_name, channel->get_topic()));
 	}
@@ -174,7 +174,7 @@ bool	User::command_TOPIC(t_command &command)
 		return true;
 	}
 	channel->set_topic(command.last_param);
-	channel->broadcast(g_data_ptr->users.at(_fd)->get_nick() + " has changed topic to " + command.last_param);
+	channel->broadcast(g_data_ptr->users.at(_fd)->get_nick() + " has changed topic to " + command.last_param, _fd);
 	/*	If protected mode and no permission	*/
 		/*	ERR_CHANOPRIVSNEEDED	*/
 		/*	QUIT	*/
@@ -359,9 +359,9 @@ bool	User::command_PART(t_command &command)
 			/*	Notify everybody that client quitted the channel  */
 	channel->part(_fd);
 	if (command.has_last_param == false)
-		channel->broadcast(_nick + " is leaving the channel " + channel_name);
+		channel->broadcast(_nick + " is leaving the channel " + channel_name, _fd);
 	else
-		channel->broadcast(_nick + " is leaving the channel " + channel_name + ": " + command.last_param);
+		channel->broadcast(_nick + " is leaving the channel " + channel_name + ": " + command.last_param, _fd);
 	/* If channel empty, remove it */
 	if (channel->get_users().empty() == true)
 	{
@@ -453,12 +453,12 @@ bool	User::command_KICK(t_command &command)
 	if (command.has_last_param == true)
 	{
 		message = "You have been kicked of the channel " + channel_name + ": " + command.last_param;	
-		channel->broadcast(kick_user->get_nick() + " has been kicked of the channel " + channel_name + ": " + command.last_param);
+		channel->broadcast(kick_user->get_nick() + " has been kicked of the channel " + channel_name + ": " + command.last_param, _fd);
 	}
 	else
 	{
 		message = "You have been kicked of the channel " + channel_name + ".";
-		channel->broadcast(kick_user->get_nick() + " has been kicked of the channel.");
+		channel->broadcast(kick_user->get_nick() + " has been kicked of the channel.", _fd);
 	}
 	write(kick_user->get_fd(), message.c_str(), message.size());
 
@@ -553,22 +553,22 @@ bool	User::command_MODE(t_command &command)
 	if (mode == "+i")
 	{
 		channel->set_invite_only(true);
-		channel->broadcast(channel_name + ": is now invite-only.");
+		channel->broadcast(channel_name + ": is now invite-only.", _fd);
 	}
 	else if (mode == "-i")
 	{
 		channel->set_invite_only(false);
-		channel->broadcast(channel_name + ": is no longer invite-only.");
+		channel->broadcast(channel_name + ": is no longer invite-only.", _fd);
 	}
 	else if (mode == "+t")
 	{
 		channel->set_protected_topic(true);
-		channel->broadcast(channel_name + ": topic is now protected.");
+		channel->broadcast(channel_name + ": topic is now protected.", _fd);
 	}
 	else if (mode == "-t")
 	{
 		channel->set_protected_topic(false);
-		channel->broadcast(channel_name + ": topic is no longer protected.");
+		channel->broadcast(channel_name + ": topic is no longer protected.", _fd);
 	}
 	else if (mode == "+k")
 	{
@@ -585,12 +585,12 @@ bool	User::command_MODE(t_command &command)
 		if (command.parameters.at(2).empty())
 		{
 			channel->disable_locked_mode();
-			channel->broadcast(channel_name + ": is no longer locked.");
+			channel->broadcast(channel_name + ": is no longer locked.", _fd);
 		}
 		else
 		{
 			channel->enable_locked_mode(command.parameters.at(2));
-			channel->broadcast(channel_name + ": is now locked.");
+			channel->broadcast(channel_name + ": is now locked.", _fd);
 		}
 	}
 	else if (mode == "-k")
@@ -611,7 +611,7 @@ bool	User::command_MODE(t_command &command)
 			return false;
 		}
 		channel->disable_locked_mode();
-		channel->broadcast(channel_name + ": is no longer locked.");
+		channel->broadcast(channel_name + ": is no longer locked.", _fd);
 	}
 	else if (mode == "+o")
 	{
@@ -641,7 +641,7 @@ bool	User::command_MODE(t_command &command)
 		}
 		if (channel->is_op(to_op_user->get_fd()) == false)
 			channel->op_user(to_op_user->get_fd());
-		channel->broadcast(channel_name + ": " + to_op_user->get_nick() + " is now channel operator.");
+		channel->broadcast(channel_name + ": " + to_op_user->get_nick() + " is now channel operator.", _fd);
 		return true;
 	}
 	else if (mode == "-o")
@@ -666,7 +666,7 @@ bool	User::command_MODE(t_command &command)
 		User *to_deop_user = it_users->second;
 		if (channel->is_op(to_deop_user->get_fd()) == true)
 			channel->deop_user(to_deop_user->get_fd());
-		channel->broadcast(channel_name + ": " + to_deop_user->get_nick() + " is no longer channel operator.");
+		channel->broadcast(channel_name + ": " + to_deop_user->get_nick() + " is no longer channel operator.", _fd);
 		return true;
 	}
 	else if (mode == "+l")
@@ -681,12 +681,12 @@ bool	User::command_MODE(t_command &command)
 			return false;
 		channel->set_max_users(value);
 		channel->set_has_user_limit(true);
-		channel->broadcast(channel_name + ": is now limited in members " + int_to_string(value) + ".");
+		channel->broadcast(channel_name + ": is now limited in members " + int_to_string(value) + ".", _fd);
 	}
 	else if (mode == "-l")
 	{
 		channel->set_has_user_limit(false);
-		channel->broadcast(channel_name + ": is no longer limited in members.");
+		channel->broadcast(channel_name + ": is no longer limited in members.", _fd);
 	}
 	else
 	{

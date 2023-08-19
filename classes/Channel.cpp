@@ -207,7 +207,7 @@ void	Channel::set_has_user_limit(bool mode)
 /*																		      */
 /******************************************************************************/
 
-void	Channel::broadcast(string message)
+void	Channel::broadcast(string message, int fd_emitter)
 {
 	vector<int>::iterator it = this->_fds_users.begin();
 	vector<int>::iterator ite = this->_fds_users.end();
@@ -215,7 +215,9 @@ void	Channel::broadcast(string message)
 	message += "\r\n";
 	for (; it != ite; it++)
 	{
-		write(*it, message.c_str(), message.size());
+		// cout << "I sended to " << int_to_string(*it) << endl; 
+		if (*it != fd_emitter)
+			write(*it, message.c_str(), message.size());
 	}
 }
 
@@ -232,17 +234,15 @@ void	Channel::print_names(int target_fd)
 	while (users_fd_beg != users_fd_end)
 	{
 		i_user = g_data_ptr->users[*users_fd_beg];
-		users_info += "[";
 		if (find(_fds_ops.begin(), _fds_ops.end(), *users_fd_beg) != _fds_ops.end())
-			users_info += "+o";
-		users_info += "]";
+			users_info += "@";
 		users_info += i_user->get_nick();
 		users_fd_beg++;
 		if (users_fd_beg != users_fd_end)
 			users_info += " ";
 	}
-	target_user->send_message(RPL_NAMREPLY(_name, users_info));
-	target_user->send_message(RPL_ENDOFNAMES(_name));
+	target_user->send_message(RPL_NAMREPLY(_name, target_user->get_nick(), target_user->get_user(), "localhost", users_info));
+	target_user->send_message(RPL_ENDOFNAMES(_name, target_user->get_nick(), target_user->get_user(), "localhost"));
 }
 
 Channel *Channel::getChannel(string name)

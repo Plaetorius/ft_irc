@@ -67,6 +67,7 @@ class User
 		int		get_id(void) const;
 		int		get_fd(void) const;
 		string	get_nick(void) const;
+		string	get_user(void) const;
 		bool	get_identification(void) const;
 		void	set_id(int id);		//TODO remove ; for debug
 		void	set_fd(int fd);		//TODO remove ; for debug

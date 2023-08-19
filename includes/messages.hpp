@@ -43,8 +43,8 @@
 # define	RPL_TOPIC(nick, user, name, channel, topic) ("332 " + nick + "!" + user + "@" + name + " " + channel + " :" + topic + "\r\n")
 # define 	RPL_INVITING(nick, user, name, invitenick, channel) ("341 " + nick + "!" + user + "@" + name + " " + invitenick + " " + channel + "\r\n")
 
-# define    RPL_NAMREPLY(channel, users) ("353 " + channel + " :" + users + "\r\n")
-# define    RPL_ENDOFNAMES(channel) ("366 " + channel + " :End of /NAMES list\r\n")
+# define    RPL_NAMREPLY(channel, nick, user, host, users) ("353 " + nick + "!" + user + "@" + host + " = " + channel + " :" + users + "\r\n")
+# define    RPL_ENDOFNAMES(channel, nick, user, host) ("366 " + nick + "!" + user + "@" + host + " = " + channel + " :End of NAMES list\r\n")
 
 // # define RPL_NAMREPLY(nick, user, host, channel) ("353 " + nick + "!" + user + "@" + host + " = " + channel + " :")
 // # define RPL_ENDOFNAMES(nick, user, host, channel) ("366 " + nick + "!" + user + "@" + host + " " + channel + " :End of NAMES list\r\n")
@@ -53,7 +53,7 @@
 # define    RPL_UMODEIS(nick) ("221 " + nick + " modes are +io\r\n")
 # define    RPL_CHANNELMODEIS(nick, channel) ("324 " + nick + " " + channel + " modes are +itko\r\n")
 # define    CREATEDCHANNEL(channel) (channel + " channel created\r\n")
-# define    JOIN(nick, user, host, channel) (":" + nick + "!" + user + "@" + host + " JOIN " + channel + "\r\n")
+# define    JOIN(nick, user, host, channel) (":" + nick + "!" + user + "@" + host + " JOIN :" + channel + "\r\n")
 // # define    PRIVMSG(nick, user, dest, string) (":" + nick + " PRIVMSG " + " :" + str + "\r\n")
 # define    PRIVMSG(nick, user, host, dest, str) (":" + nick + "!" + user + "@" + "localhost" + " PRIVMSG " + dest + " :" + str + "\r\n")
 

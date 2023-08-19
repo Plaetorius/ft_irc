@@ -77,6 +77,7 @@ bool    User::is_operator(void)
 int	User::get_fd(void) const {return this->_fd;};
 int User::get_id(void) const {return this->_id;};
 string User::get_nick(void) const {return this->_nick;};
+string	User::get_user(void) const {return this->_user;};
 bool	User::get_identification(void) const {return this->_is_identified;};
 
 

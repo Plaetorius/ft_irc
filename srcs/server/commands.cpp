@@ -290,9 +290,9 @@ int		User::command_KILL(t_command &command)
         if (myChannel->get_users().size() != 0)
         {
             if (has_reason == 1)
-                myChannel->broadcast(QUIT_WREASON(target_nick, command.last_param));
+                myChannel->broadcast(QUIT_WREASON(target_nick, command.last_param), _fd);
             else
-                myChannel->broadcast(QUIT_WOREASON(target_nick));
+                myChannel->broadcast(QUIT_WOREASON(target_nick), _fd);
         }
         else    // No more users left in the channel
         {
@@ -338,9 +338,9 @@ int     User::command_QUIT(t_command &command)
         if (myChannel->get_users().size() != 0) // There is someone in the channel
         {
             if (command.last_param.size() != 0)
-                myChannel->broadcast(QUIT_WREASON(_nick, command.last_param));
+                myChannel->broadcast(QUIT_WREASON(_nick, command.last_param), _fd);
             else
-                myChannel->broadcast(QUIT_WOREASON(_nick));
+                myChannel->broadcast(QUIT_WOREASON(_nick), _fd);
         }
         else    // No more users left in the channel
         {
@@ -393,8 +393,11 @@ bool	User::command_PRIVMSG(t_command &command)
         if (!myChannel)
        		send_message(ERR_NOSUCHCHANNEL(_nick, param_str));
         else
+        {
+            cout << "Channel: " << myChannel->get_name() << ": " << command.last_param << endl; 
+            myChannel->broadcast(PRIVMSG(_nick, _user, "localhost", param_str, command.last_param), _fd);
+        }
             /*  Broadcast to everybody  */
-            myChannel->broadcast(command.last_param + "\r\n");
     }
     /*  else param is user  */
     else
@@ -445,7 +448,7 @@ bool	User::command_NOTICE(t_command &command)
        		send_message(ERR_NOSUCHCHANNEL(_nick, param_str));
             return false;
         /*  Broadcast to everybody  */
-        myChannel->broadcast(command.last_param + "\r\n");
+        myChannel->broadcast(command.last_param, _fd);
     }
     /*  else param is user  */
     else

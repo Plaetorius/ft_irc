@@ -81,7 +81,8 @@ void	execute_commands(t_command &command, User *user)
 		cout << endl << endl;
 
 		if (command.command == "PASS") {
-			result = user->command_PASS(command);
+			if (user->command_PASS(command) == false)
+				user_disconnection(*g_data_ptr, user->get_fd());
 		} else if (command.command == "NICK") {
 			result = user->command_NICK(command);
 		} else if (command.command == "USER") {

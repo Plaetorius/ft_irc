@@ -56,7 +56,7 @@ class Channel
 		unsigned int	get_user_limit(void) const;
 		bool			get_has_user_limit(void) const;
 
-		void			broadcast(string message);
+		void			broadcast(string message, int emitter);
 		void			print_names(int target_fd);
 		static Channel *getChannel(string name);
 };
