@@ -59,8 +59,9 @@ t_command	parse_raw_input(string raw_input)
 			parameter = raw_input.substr(0, ind);
 			result.parameters.push_back(parameter);
 			raw_input = raw_input.substr(parameter.size(), raw_input.size() - parameter.size());
-			if (raw_input[ind - result.command.size()] == '\n')
+			if (ind - result.command.size() < raw_input.size() && raw_input[ind - result.command.size()] == '\n')
 				return result;
+		
 			raw_input = trim_spaces(raw_input);
 			if (raw_input.size() == 1 && string(" \r\n", 3).find(raw_input[0]))
 				raw_input.clear();

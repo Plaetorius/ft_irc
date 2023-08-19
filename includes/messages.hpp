@@ -5,6 +5,7 @@
 # define    RPL_WELCOME(nick, user, port) ("001 " + nick + " :Welcome to the " + port + " Network, " + nick + "[!" + user + "@" + LOCAL_HOST + "]\r\n")
 
 # define	INVITE(nick, user, name, nickinvite, channel)  ("" + nick + "!" + user + "@" + name + " INVITE " + nickinvite + " " + channel + "\r\n")
+# define	MODE(nick, user, host, mode) (":" + nick + "!" + user + "@" + host + " MODE " + mode)
 
 /*  USER messages    */
 # define    ERR_ALREADYREGISTERED(client) ("462 " + client + " :You may not reregister\r\n")

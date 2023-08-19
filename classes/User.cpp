@@ -22,7 +22,7 @@ User& User::operator=(const User &rhs)
 
 User::~User() {}
 
-User::User(int fd, int id) : _id(id), _fd(fd), _has_password(false), _has_nick(false), _has_user(false), _is_identified(false), server(g_data_ptr) {}
+User::User(int id, int fd) : _id(id), _fd(fd), _has_password(false), _has_nick(false), _has_user(false), _is_identified(false), server(g_data_ptr) {}
 
 void	User::push_back_command(t_command &command)
 {

@@ -16,7 +16,7 @@ static void	user_connection(t_data &data)
 	fd_new_con = accept(data.socket.fd, (struct sockaddr *)&socket_new_con, &size_socket_new_con);
 	if (fd_new_con < 0)
 		clear_data_exit(data, "accept() failed", 1);
-	new_user = new User(fd_new_con, user_id);
+	new_user = new User(user_id, fd_new_con);
 	data.users.insert(make_pair<int, User *>(fd_new_con, new_user));
 	data.open_fds.push_back(fd_new_con);
 	epoll_event_new_con.events = EPOLLIN | EPOLLRDHUP;
