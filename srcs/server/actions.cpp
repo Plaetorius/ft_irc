@@ -94,15 +94,11 @@ void	execute_commands(t_command &command, User *user)
 			result = user->command_names(command);
 		} else if (command.command == "PRIVMSG") {
 			result = user->command_PRIVMSG(command);
-		} 
-		else if (command.command == "QUIT")
-		{
+		} else if (command.command == "QUIT") {
 			quit_fd = user->command_QUIT(command);
 			user_disconnection(*g_data_ptr, quit_fd);
 			break;
-		} 
-		else if (command.command == "KILL")
-		{
+		} else if (command.command == "KILL") {
 			quit_fd = user->command_KILL(command);
 			user_disconnection(*g_data_ptr, quit_fd);
 			break;
