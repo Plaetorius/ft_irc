@@ -19,6 +19,8 @@ SRCS	=	$(addsuffix .cpp,		\
 			)						\
 			$(addprefix server/,	\
 				actions				\
+				commands_channel	\
+				commands			\
 			)						\
 			$(addprefix cleaning/,	\
 				clear_data			\
@@ -72,7 +74,7 @@ ${NAME}: ${OBJS}
 all: ${NAME}
 
 bonus: ${BOBJS}
-	@${CC} ${FLAGS} ${BOBJS} ${INCL} -o $@ 
+	@${CC} -g3 ${FLAGS} ${BOBJS} ${INCL} -o $@ 
 	@echo "${LGREEN}Successfully created ${NC}${CYAN}Tosser${NC}${LGREEN}!${NC}"
 
 test: re 

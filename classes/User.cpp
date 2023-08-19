@@ -22,7 +22,7 @@ User& User::operator=(const User &rhs)
 
 User::~User() {}
 
-User::User(int fd, int id) : _id(id), _fd(fd) {}
+User::User(int fd, int id) : _id(id), _fd(fd), _has_password(false), _has_nick(false), _has_user(false), _is_identified(false), server(g_data_ptr) {}
 
 void	User::push_back_command(t_command &command)
 {
@@ -77,6 +77,8 @@ bool    User::is_operator(void)
 int	User::get_fd(void) const {return this->_fd;};
 int User::get_id(void) const {return this->_id;};
 string User::get_nick(void) const {return this->_nick;};
+bool	User::get_identification(void) const {return this->_is_identified;};
+
 
 //TODO remove ; for debug
 void User::set_id(int id) {this->_id = id;};

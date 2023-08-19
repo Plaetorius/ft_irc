@@ -50,7 +50,7 @@ bool	User::command_NICK(t_command &command)
 				/*	Check if password is set	*/
 	/*  ********************************************************************* */
 	if (!_has_password) {
-		send_message(PERMISSIONDENIED);
+		send_message(PERMISSIONDENIED(command.command));
 		return false;
 	}
 
@@ -93,7 +93,7 @@ bool	User::command_NICK(t_command &command)
     /*  ********************************************************************* */
                     /*  Check if the nick already exists    */
     /*  ********************************************************************* */
-    for (int i = 0; i < g_data_ptr->open_fds.size(); i++)
+    for (size_t i = 0; i < g_data_ptr->open_fds.size(); i++)
     {
         if (g_data_ptr->users[g_data_ptr->open_fds[i]]->get_nick() == param)
         {
@@ -110,7 +110,7 @@ bool	User::command_NICK(t_command &command)
     /*  ********************************************************************* */
     if (this->_has_nick)
     {
-        for (int i = 0; i < g_data_ptr->open_fds.size(); i++)
+        for (size_t i = 0; i < g_data_ptr->open_fds.size(); i++)
         {
             User    *user = g_data_ptr->users[g_data_ptr->open_fds[i]];
             if (user->get_identification() == true && user->get_fd() != this->_fd)
@@ -148,7 +148,7 @@ bool	User::command_USER(t_command &command)
 								/*	Small checks	*/
 	/*	********************************************************************* */
 	if (!_has_password) {
-		send_message(PERMISSIONDENIED);
+		send_message(PERMISSIONDENIED(command.command));
 		return false;
 	}
 	if (command.last_param.empty() == true || command.parameters.size() == 0) {
@@ -213,7 +213,7 @@ bool	User::command_OPER(t_command &command)
 							/*	Basic checks	*/
 	/*	********************************************************************* */
 	if (_is_identified == false) {
-		send_message(PERMISSIONDENIED);
+		send_message(PERMISSIONDENIED(command.command));
 		return false;
 	}
 	if (command.parameters.size() < 2) {
@@ -254,7 +254,7 @@ int		User::command_KILL(t_command &command)
                                 /*  Basic tests */
     /*	********************************************************************* */
     if (_is_identified == false) {
-		send_message(PERMISSIONDENIED);
+		send_message(PERMISSIONDENIED(command.command));
 		return false;
 	}
 	if (command.parameters.size() < 1) {
@@ -377,7 +377,7 @@ bool	User::command_PRIVMSG(t_command &command)
 {
     /*  Basic tests */
     if (_is_identified == false) {
-		send_message(PERMISSIONDENIED);
+		send_message(PERMISSIONDENIED(command.command));
 		return false;
 	}
 	if (command.parameters.size() < 1) {
@@ -428,7 +428,7 @@ bool	User::command_NOTICE(t_command &command)
 {
     /*  Basic tests */
     if (_is_identified == false) {
-		send_message(PERMISSIONDENIED);
+		send_message(PERMISSIONDENIED(command.command));
 		return false;
 	}
 	if (command.parameters.size() < 2) {

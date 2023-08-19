@@ -67,13 +67,17 @@ static void	user_disconnection(t_data &data, int fd)
 void	execute_commands(t_command &command, User *user)
 {
 	cout << "============================================" << endl << "Start execute commands" << endl <<  "============================================" << endl;
-	// while (this->_commands.empty() == false)
-	// {
-	// 	cout << this->_commands.front().command << endl;
-	// 	this->_commands.pop_front(); 
-	// }
+
+	while (user->_commands.empty() == false)
+	{
+		command = user->_commands.front();
+		if (command.parameters.size() > 0)
+			cout << command.parameters.at(0) << endl;
+		user->_commands.pop_front(); 
     bool    result;
     int     quit_fd;
+
+	cout << "Command being executed: " << command.command << endl;
 
     if (command.command == "PASS") {
         result = user->command_PASS(command);
@@ -118,10 +122,11 @@ void	execute_commands(t_command &command, User *user)
     } else if (command.command == "INVITE") {
         result = user->command_INVITE(command);
     } else {
-        return ;
+		// exit(1);
+        continue ;
     }
-
 	cout << "============================================" << endl << "End execute commands" << endl <<  "============================================" << endl;
+	}
 }
 
 static void	user_command(int user_fd, t_data &data)

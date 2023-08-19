@@ -28,7 +28,6 @@ class Channel
 		bool			is_invited(int fd_user);
 		
 		void			add_user(int fd_user);
-		void			kick_user(int to_kick_fd);
 		void			kick_user(int fd_to_kick);
 		void			part(int fd_user);
 		void			op_user( int fd_to_op);
@@ -59,7 +58,7 @@ class Channel
 
 		void			broadcast(string message);
 		void			print_names(int target_fd);
-		static Channel *Channel::getChannel(string name);
+		static Channel *getChannel(string name);
 };
 
 #endif

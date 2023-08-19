@@ -117,11 +117,6 @@ void	Channel::kick_user(int fd_to_kick)
 	this->_fds_users.erase(find(this->_fds_users.begin(), this->_fds_users.end(), fd_to_kick));
 }
 
-void	Channel::kick_user(int fd_to_kick)
-{
-	this->_fds_users.erase(find(this->_fds_users.begin(), this->_fds_users.end(), fd_to_kick));
-}
-
 void	Channel::part(int fd_user)
 {
 	this->_fds_users.erase(find(this->_fds_users.begin(), this->_fds_users.end(), fd_user));
@@ -238,7 +233,7 @@ void	Channel::print_names(int target_fd)
 		i_user = g_data_ptr->users[*users_fd_beg];
 		if (find(_fds_ops.begin(), _fds_ops.end(), *users_fd_beg) != _fds_ops.end())
 			prefix = prefix + "+o";
-		target_user->send_message(RPL_NAMREPLY(int_to_string(target_user->get_id()), _name, prefix, i_user->get_nick()));
+		target_user->send_message(RPL_NAMREPLY(_name, prefix, i_user->get_nick()));
 		users_fd_beg++;
 	}
 	target_user->send_message(RPL_ENDOFNAMES(int_to_string(target_user->get_id()), _name));

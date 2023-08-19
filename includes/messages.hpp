@@ -2,20 +2,20 @@
 # define MESSAGES_HPP
 
 /*  General messages    */
-# define    RPL_WELCOME(client, nick, user, port) (client + " :Welcome to the " + port + " Network, " + nick + "[!" + user + "@" + LOCAL_HOST + "]/r/n")
+# define    RPL_WELCOME(client, nick, user, port) ("001 :" + client + " :Welcome to the " + port + " Network, " + nick + "[!" + user + "@" + LOCAL_HOST + "]\r\n")
 # define	INVITE(nick, user, name, nickinvite, channel)  (":" + nick + "!" + user + "@" + name + " INVITE " + nickinvite + " " + channel + "\r\n")
 
 
 /*  USER messages    */
 # define    ERR_ALREADYREGISTERED(client) ("462 :" + client + " :You may not reregister\r\n")
 # define    ERR_NEEDMOREPARAMS(client, command) ("461 :" + client + " " + command + " :Not enough parametes\r\n")
-# define    ERR_PASSWDMISMATCH(client) ("464 :" + client + " :Password incorrect/r/n")
-# define    ERR_NONICKNAMEGIVEN(client) ("431 :" + client + " :No nickname given/r/n")
+# define    ERR_PASSWDMISMATCH(client) ("464 :" + client + " :Password incorrect\r\n")
+# define    ERR_NONICKNAMEGIVEN(client) ("431 :" + client + " :No nickname given\r\n")
 # define    ERR_ERRONEUSNICKNAME(client, nick) ("432 :" + client + " " + nick + " :Erroneus nickname\r\n")
 # define    ERR_NICKNAMEINUSE(client, nick) ("433 :" + client + " " + nick + " :Nickname is alreay in use\r\n")
 # define    CHANGE_NICKNAME(old_nick, nick) (":" + old_nick + " NICK " + nick + "\r\n")
-# define    PERMISSIONDENIED "ERROR :You must provide a valid password using the PASS command before accessing any function/r/n"
-# define    ERR_NOSUCHNICKCHANNEL(nick) ("401 :" + nick + " : No such nick/r/n")
+# define    PERMISSIONDENIED(command) ("ERROR " + command + " :You must provide a valid password using the PASS command before accessing any function\r\n")
+# define    ERR_NOSUCHNICKCHANNEL(nick) ("401 :" + nick + " : No such nick\r\n")
 // # define    PRIVMSG(nick, user, host, dest, str) (":" + nick + "!" + user + "@" + host + " PRIVMSG " + dest + " :" + str + "\r\n")
 # define    PRIVMSG(nick, string) (":" + nick + " PRIVMSG " + " :" + string + "\r\n")
 # define    ERR_NOPRIVILEGES(nick) ("481 :" + nick + " :Permission denied- You are not an IRC operator\r\n")

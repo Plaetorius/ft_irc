@@ -22,10 +22,10 @@ class User
 		
 		/*	Pointers to the classes the user is in	*/
 		vector<Channel *>	_channels;
-		list<t_command>		_commands;
 		t_data				*server;
 
 	public:
+		list<t_command>		_commands; //TODO change back  to private
 		/*	Constructors and Destructor	*/
 		User();
 		User(int fd, int id);
