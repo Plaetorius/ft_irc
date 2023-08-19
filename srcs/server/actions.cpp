@@ -98,16 +98,14 @@ void	execute_commands(t_command &command, User *user)
 		else if (command.command == "QUIT")
 		{
 			quit_fd = user->command_QUIT(command);
-			delete user;
-			g_data_ptr->open_fds.erase(find(g_data_ptr->open_fds.begin(), g_data_ptr->open_fds.end(), quit_fd));
 			user_disconnection(*g_data_ptr, quit_fd);
+			break;
 		} 
 		else if (command.command == "KILL")
 		{
 			quit_fd = user->command_KILL(command);
-			delete g_data_ptr->users[quit_fd];
-			g_data_ptr->open_fds.erase(find(g_data_ptr->open_fds.begin(), g_data_ptr->open_fds.end(), quit_fd));
 			user_disconnection(*g_data_ptr, quit_fd);
+			break;
 		} else if (command.command == "PART") {
 			result = user->command_PART(command);
 		} else if (command.command == "KICK") {
