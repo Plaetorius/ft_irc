@@ -65,11 +65,8 @@ bool	User::command_JOIN(t_command &command)
 			send_message(ERR_BADCHANNELKEY(_nick, channel_name));
 			return false;
 		}
-		// channel->broadcast(JOIN(_nick, _user, channel_name));
-		// send_message(RPL_TOPIC(_nick, _user, _name, channel_name, channel->get_topic()));
-		// channel->print_names(_fd);
-		// channel->add_user(_fd);
-		// _channels.push_back(channel);
+		channel->broadcast(JOIN(_nick, _user, channel_name));
+		channel->add_user(_fd);
 	}
 	else
 	{
@@ -77,8 +74,7 @@ bool	User::command_JOIN(t_command &command)
 		send_message(CREATEDCHANNEL(channel_name));
 		g_data_ptr->channels[channel_name] = channel;
 	}
-	channel->add_user(_fd);
-	channel->broadcast(JOIN(_nick, _user, channel_name));
+	
 	send_message(RPL_TOPIC(_nick, _user, _name, channel_name, channel->get_topic()));
 	channel->print_names(_fd);
 	_channels.push_back(channel);
@@ -494,6 +490,8 @@ bool	User::command_MODE(t_command &command)
 		send_message(ERR_NEEDMOREPARAMS(_nick, "MODE"));
 		return false;
 	}
+	if (command.parameters.at(0)[0] != '#')
+		return true;
 	/*	If channel doesn't exist	*/
 		/*	ERR_NOSUCHCHANNEL	*/
 		/*	Exit	*/

@@ -100,8 +100,6 @@ bool	User::command_NICK(t_command &command)
             if (g_data_ptr->open_fds[i] != this->_fd)
             {
                 param = param + "_";
-                // send_message(ERR_NICKNAMEINUSE(int_to_string(this->_id), param));
-                // return (false);
             }
         }
     }
@@ -127,8 +125,7 @@ bool	User::command_NICK(t_command &command)
     if (this->_has_user && this->_has_password && !this->_is_identified)
     {
         this->_is_identified = true;
-        this->send_message(RPL_WELCOME(_nick, _nick, _user, 
-                                        int_to_string(g_data_ptr->port)));
+        this->send_message(RPL_WELCOME(_nick, _user, int_to_string(g_data_ptr->port)));
     }
     return true;
 }
@@ -170,8 +167,7 @@ bool	User::command_USER(t_command &command)
 	if (_has_user && _has_nick && !_is_identified)
 	{
 		this->_is_identified = true;
-		send_message(RPL_WELCOME(int_to_string(_id), _nick, _user, 
-                                    int_to_string(g_data_ptr->port)));
+		send_message(RPL_WELCOME(_nick, _user, int_to_string(g_data_ptr->port)));
 	} 
 	return true;
 }

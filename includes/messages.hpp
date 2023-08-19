@@ -2,9 +2,9 @@
 # define MESSAGES_HPP
 
 /*  General messages    */
-# define    RPL_WELCOME(client, nick, user, port) ("001 " + client + " :Welcome to the " + port + " Network, " + nick + "[!" + user + "@" + LOCAL_HOST + "]\r\n")
-# define	INVITE(nick, user, name, nickinvite, channel)  ("" + nick + "!" + user + "@" + name + " INVITE " + nickinvite + " " + channel + "\r\n")
+# define    RPL_WELCOME(nick, user, port) ("001 " + nick + " :Welcome to the " + port + " Network, " + nick + "[!" + user + "@" + LOCAL_HOST + "]\r\n")
 
+# define	INVITE(nick, user, name, nickinvite, channel)  ("" + nick + "!" + user + "@" + name + " INVITE " + nickinvite + " " + channel + "\r\n")
 
 /*  USER messages    */
 # define    ERR_ALREADYREGISTERED(client) ("462 " + client + " :You may not reregister\r\n")
@@ -47,7 +47,5 @@
 # define    CREATEDCHANNEL(channel) (channel + " channel created\r\n")
 // # define    JOINEDCHANNEL(nick, channel) (nick + " joined :" + channel + "\r\n")
 # define    JOIN(nick, user, channel) ("" + nick + "!" + user + "@localhost JOIN " + channel + "\r\n")
-
-// # define 	RPL_TOPICWHOTIME(nick, chan, whoset, user, setat) ("333 :" + nick + " " + chan + " " + whoset + "!" + user + "@localhost " + setat + "\r\n")
 
 #endif
