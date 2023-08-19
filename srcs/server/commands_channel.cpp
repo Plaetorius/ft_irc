@@ -43,10 +43,6 @@ bool	User::command_JOIN(t_command &command)
 	else
 		channel_key = command.parameters.back();
 	channel = Channel::getChannel(channel_name);
-	// if (channel == NULL && is_operator() == false) {
-	// 	send_message(ERR_NOSUCHCHANNEL(_nick, channel_name));
-	// 	return false;	
-	// }
 
 	/*  ********************************************************************* */
 						/*	Interract with the channel	*/

@@ -222,8 +222,8 @@ void	server_actions(t_data &data, int i)
 
 	if (data.epoll.events[i].data.fd == data.socket.fd)			//Check if the user 
 		user_connection(data);									//Connect a user
-	if (/*(data.epoll.events[i].events & EPOLLERR)
-		|| */(data.epoll.events[i].events & EPOLLHUP)
+	if ((data.epoll.events[i].events & EPOLLERR)
+		|| (data.epoll.events[i].events & EPOLLHUP)
 		|| (data.epoll.events[i].events & EPOLLRDHUP)
 		|| !(data.epoll.events[i].events & EPOLLIN))			//Check if the user has shutdown the connection
 		user_disconnection(data, data.epoll.events[i].data.fd);	//Disconnect a user
