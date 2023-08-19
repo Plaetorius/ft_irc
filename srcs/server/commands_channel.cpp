@@ -65,18 +65,22 @@ bool	User::command_JOIN(t_command &command)
 			send_message(ERR_BADCHANNELKEY(_nick, channel_name));
 			return false;
 		}
-		channel->broadcast(JOIN(_nick, _user, channel_name));
+		channel->broadcast(JOIN(_nick, _user, "localhost",  channel_name));
 		channel->add_user(_fd);
+		if (channel->get_topic_set() == true)
+			send_message(RPL_TOPIC(_nick, _user, _name, channel_name, channel->get_topic()));
+		channel->print_names(_fd);
 	}
 	else
 	{
 		channel = new Channel(channel_name, _fd);
 		send_message(CREATEDCHANNEL(channel_name));
 		g_data_ptr->channels[channel_name] = channel;
+		
+		channel->broadcast(JOIN(_nick, _user, "localhost", channel_name));
+		// channel->add_user(_fd);
+		// send_message(RPL_TOPIC(_nick, _user, _name, channel_name, channel->get_topic()));
 	}
-	
-	send_message(RPL_TOPIC(_nick, _user, _name, channel_name, channel->get_topic()));
-	channel->print_names(_fd);
 	_channels.push_back(channel);
 	return true;
 }
@@ -485,13 +489,48 @@ bool	User::command_MODE(t_command &command)
 		return false;
 	}
 		/*	If not enough parameters	*/
-	if (command.parameters.size() < 2)
+	if (command.parameters.size() < 1)
 	{
 		send_message(ERR_NEEDMOREPARAMS(_nick, "MODE"));
 		return false;
 	}
-	if (command.parameters.at(0)[0] != '#')
+	if (command.parameters.size() == 1)
+	{
+		string	myBeautifulString;
+
+		myBeautifulString = command.parameters.front();
+		if (myBeautifulString[0] == '#')
+		{
+			Channel *smartChannel;
+
+			smartChannel = Channel::getChannel(myBeautifulString);
+			if (smartChannel == NULL)
+			{
+				send_message(ERR_NOSUCHCHANNEL(_nick, command.parameters.front()));
+				return false;
+			}
+			send_message(RPL_CHANNELMODEIS(_nick, smartChannel->get_name()));
+			return true;
+		}
+		else
+		{
+			User	*sportyUser;
+
+			sportyUser = User::getUser(myBeautifulString, g_data_ptr);
+			if (sportyUser == NULL)
+			{
+				send_message(ERR_NOSUCHNICKCHANNEL(myBeautifulString));
+				return false;
+			}
+			send_message(RPL_UMODEIS(myBeautifulString));
+			return true;
+		}
+	}
+	if (command.parameters.front()[0] != '#')
 		return true;
+
+	// I added this, because the +i commands takes a nickname and not a channelname as a first paramater, yes 
+
 	/*	If channel doesn't exist	*/
 		/*	ERR_NOSUCHCHANNEL	*/
 		/*	Exit	*/

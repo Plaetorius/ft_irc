@@ -394,10 +394,7 @@ bool	User::command_PRIVMSG(t_command &command)
        		send_message(ERR_NOSUCHCHANNEL(_nick, param_str));
         else
             /*  Broadcast to everybody  */
-            {
-                cout << "++++++++++++++++++++++++++++++++++++++" << endl;
-                myChannel->broadcast(command.last_param + "\r\n");
-            }
+            myChannel->broadcast(command.last_param + "\r\n");
     }
     /*  else param is user  */
     else
@@ -411,7 +408,7 @@ bool	User::command_PRIVMSG(t_command &command)
         }
 
         /*  Send the message    */
-        myUser->send_message(PRIVMSG(_nick, command.last_param));
+        myUser->send_message(PRIVMSG(_nick, _user, "localhost", param_str, command.last_param));
     }
     return true;
 }
@@ -462,7 +459,7 @@ bool	User::command_NOTICE(t_command &command)
         }
     
         /*  Send the message    */
-        myUser->send_message(PRIVMSG(_nick, command.last_param));
+        myUser->send_message(PRIVMSG(_nick, _user, "localhost", param_str, command.last_param));
     }
     return true;
 }

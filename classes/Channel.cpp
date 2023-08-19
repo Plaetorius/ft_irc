@@ -109,7 +109,7 @@ void	Channel::add_user(int fd_user)
 	//USEFULE FOR JOIN ^^^^^^^^
 	if (this->_fds_users.empty())
 		this->_fds_ops.push_back(fd_user);
-	cout << "^^^^^^^^^^^^^^^^^ADD USER^^^^^^^^^^^^^^^^^^^^^^" << endl;
+	// cout << "^^^^^^^^^^^^^^^^^ADD USER^^^^^^^^^^^^^^^^^^^^^^" << endl;
 	this->_fds_users.push_back(fd_user);
 }
 
@@ -223,7 +223,7 @@ void	Channel::print_names(int target_fd)
 {
 	User	*target_user;
 	User	*i_user;
-	string	prefix = "";
+	string	users_info = "";
 
 	vector<int>::iterator users_fd_beg = _fds_users.begin();
 	vector<int>::iterator users_fd_end = _fds_users.end();
@@ -232,12 +232,17 @@ void	Channel::print_names(int target_fd)
 	while (users_fd_beg != users_fd_end)
 	{
 		i_user = g_data_ptr->users[*users_fd_beg];
+		users_info += "[";
 		if (find(_fds_ops.begin(), _fds_ops.end(), *users_fd_beg) != _fds_ops.end())
-			prefix = prefix + "+o";
-		target_user->send_message(RPL_NAMREPLY(_name, prefix, i_user->get_nick()));
+			users_info += "+o";
+		users_info += "]";
+		users_info += i_user->get_nick();
 		users_fd_beg++;
+		if (users_fd_beg != users_fd_end)
+			users_info += " ";
 	}
-	target_user->send_message(RPL_ENDOFNAMES(int_to_string(target_user->get_id()), _name));
+	target_user->send_message(RPL_NAMREPLY(_name, users_info));
+	target_user->send_message(RPL_ENDOFNAMES(_name));
 }
 
 Channel *Channel::getChannel(string name)

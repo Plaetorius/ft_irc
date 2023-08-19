@@ -66,7 +66,7 @@ static void	user_disconnection(t_data &data, int fd)
 */
 void	execute_commands(t_command &command, User *user)
 {
-	cout << "============================================" << endl << "Start execute commands" << endl <<  "============================================" << endl;
+	// cout << "============================================" << endl << "Start execute commands" << endl <<  "============================================" << endl;
 
 	while (user->_commands.empty() == false)
 	{
@@ -126,7 +126,7 @@ void	execute_commands(t_command &command, User *user)
 			continue ;
 		}
 	}
-	cout << "============================================" << endl << "End execute commands" << endl <<  "============================================" << endl;
+	// cout << "============================================" << endl << "End execute commands" << endl <<  "============================================" << endl;
 }
 
 static void	user_command(int user_fd, t_data &data)
