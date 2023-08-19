@@ -99,8 +99,9 @@ bool	User::command_NICK(t_command &command)
         {
             if (g_data_ptr->open_fds[i] != this->_fd)
             {
-                send_message(ERR_NICKNAMEINUSE(int_to_string(this->_id), param));
-                return (false);
+                param = param + "_";
+                // send_message(ERR_NICKNAMEINUSE(int_to_string(this->_id), param));
+                // return (false);
             }
         }
     }
@@ -126,7 +127,7 @@ bool	User::command_NICK(t_command &command)
     if (this->_has_user && this->_has_password && !this->_is_identified)
     {
         this->_is_identified = true;
-        this->send_message(RPL_WELCOME(int_to_string(_id), _nick, _user, 
+        this->send_message(RPL_WELCOME(_nick, _nick, _user, 
                                         int_to_string(g_data_ptr->port)));
     }
     return true;
@@ -186,7 +187,7 @@ bool	User::command_PING(t_command &command)
 					/*	Check the number of parameters	*/
 	/*	********************************************************************* */
 	if (command.parameters.size() == 0) {
-		send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "PING"));
+		send_message(ERR_NEEDMOREPARAMS(_nick, "PING"));
 		return false;
 	}
 
@@ -217,7 +218,7 @@ bool	User::command_OPER(t_command &command)
 		return false;
 	}
 	if (command.parameters.size() < 2) {
-		send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "OPER"));
+		send_message(ERR_NEEDMOREPARAMS(_nick, "OPER"));
 		return false;
 	}
 
@@ -226,11 +227,11 @@ bool	User::command_OPER(t_command &command)
 	/*	********************************************************************* */
 	if (command.parameters.front() != LOGIN || command.parameters.back() != PASSWORD)
 	{
-		send_message(ERR_PASSWDMISMATCH(int_to_string(_id)));
+		send_message(ERR_PASSWDMISMATCH(_nick));
 		return false;
 	}
 
-	send_message(RPL_YOUREOPER(int_to_string(this->_id)));
+	send_message(RPL_YOUREOPER(_nick));
     server->operator_fds.push_back(_id);
 	return true;
 }
@@ -258,7 +259,7 @@ int		User::command_KILL(t_command &command)
 		return false;
 	}
 	if (command.parameters.size() < 1) {
-		send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "KILL"));
+		send_message(ERR_NEEDMOREPARAMS(_nick, "KILL"));
 		return false;
 	}
     if (is_operator() == false) {
@@ -381,7 +382,7 @@ bool	User::command_PRIVMSG(t_command &command)
 		return false;
 	}
 	if (command.parameters.size() < 1) {
-		send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "PRIVMSG"));
+		send_message(ERR_NEEDMOREPARAMS(_nick, "PRIVMSG"));
 		return false;
 	}
 
@@ -390,14 +391,17 @@ bool	User::command_PRIVMSG(t_command &command)
     /*  if param is channel */
     if (param_str[0] == '#')
     {
-        Channel *myChannel = Channel::getChannel(param_str.substr(1));
+        Channel *myChannel = Channel::getChannel(param_str.substr(0));
 
         /*  If channel doesn't exist    */ /* Error */
         if (!myChannel)
-       		send_message(ERR_NOSUCHCHANNEL(int_to_string(_id), param_str));
+       		send_message(ERR_NOSUCHCHANNEL(_nick, param_str));
         else
             /*  Broadcast to everybody  */
-            myChannel->broadcast(command.last_param + "\r\n");
+            {
+                cout << "++++++++++++++++++++++++++++++++++++++" << endl;
+                myChannel->broadcast(command.last_param + "\r\n");
+            }
     }
     /*  else param is user  */
     else
@@ -432,7 +436,7 @@ bool	User::command_NOTICE(t_command &command)
 		return false;
 	}
 	if (command.parameters.size() < 2) {
-		send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "PRIVMSG"));
+		send_message(ERR_NEEDMOREPARAMS(_nick, "PRIVMSG"));
 		return false;
 	}
 
@@ -445,7 +449,7 @@ bool	User::command_NOTICE(t_command &command)
 
         /*  If channel doesn't exist    */ /* Error */
         if (!myChannel)
-       		send_message(ERR_NOSUCHCHANNEL(int_to_string(_id), param_str));
+       		send_message(ERR_NOSUCHCHANNEL(_nick, param_str));
             return false;
         /*  Broadcast to everybody  */
         myChannel->broadcast(command.last_param + "\r\n");

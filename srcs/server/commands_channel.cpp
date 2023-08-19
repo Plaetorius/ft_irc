@@ -25,7 +25,7 @@ bool	User::command_JOIN(t_command &command)
 		send_message(PERMISSIONDENIED(command.command));
 		return false;
 	}
-	if (command.parameters.size() != 2) {
+	if (command.parameters.size() < 1) {
 		send_message(ERR_NEEDMOREPARAMS(_nick, "JOIN"));
 		return false;
 	}
@@ -43,10 +43,10 @@ bool	User::command_JOIN(t_command &command)
 	else
 		channel_key = command.parameters.back();
 	channel = Channel::getChannel(channel_name);
-	if (channel == NULL && is_operator() == false) {
-		send_message(ERR_NOSUCHCHANNEL(_nick, channel_name));
-		return false;	
-	}
+	// if (channel == NULL && is_operator() == false) {
+	// 	send_message(ERR_NOSUCHCHANNEL(_nick, channel_name));
+	// 	return false;	
+	// }
 
 	/*  ********************************************************************* */
 						/*	Interract with the channel	*/
@@ -65,19 +65,23 @@ bool	User::command_JOIN(t_command &command)
 			send_message(ERR_BADCHANNELKEY(_nick, channel_name));
 			return false;
 		}
-		channel->broadcast(JOINEDCHANNEL(_nick, channel_name));
-		send_message(RPL_TOPIC(_nick, _user, _name, channel_name, channel->get_topic()));
-		channel->print_names(_fd);
-		channel->add_user(_fd);
-		_channels.push_back(channel);
+		// channel->broadcast(JOIN(_nick, _user, channel_name));
+		// send_message(RPL_TOPIC(_nick, _user, _name, channel_name, channel->get_topic()));
+		// channel->print_names(_fd);
+		// channel->add_user(_fd);
+		// _channels.push_back(channel);
 	}
-	else 
+	else
 	{
 		channel = new Channel(channel_name, _fd);
 		send_message(CREATEDCHANNEL(channel_name));
 		g_data_ptr->channels[channel_name] = channel;
-		_channels.push_back(channel);
 	}
+	channel->add_user(_fd);
+	channel->broadcast(JOIN(_nick, _user, channel_name));
+	send_message(RPL_TOPIC(_nick, _user, _name, channel_name, channel->get_topic()));
+	channel->print_names(_fd);
+	_channels.push_back(channel);
 	return true;
 }
 
@@ -93,8 +97,6 @@ bool	User::command_JOIN(t_command &command)
  */
 bool	User::command_TOPIC(t_command &command)
 {
-	std::cout << "Salut, Je m'appelle TOPIC Command" << std::endl;
-	return true;
 	/*  ********************************************************************* */
 							/*	General checks	*/
 	/*  ********************************************************************* */
@@ -183,6 +185,7 @@ bool	User::command_TOPIC(t_command &command)
 	
 	/*	Change the topic	*/
 	/*	Broadcast message that you changed the topic	*/
+	return true;
 }
 
 /**
@@ -231,9 +234,6 @@ bool	User::command_names(t_command &command)
  */
 bool	User::command_INVITE(t_command &command)
 {
-	std::cout << "Salut, Je m'appelle INVITE Command" << std::endl;
-	return true;
-
 	/*	Basic tests	*/
 		/*	If not authenticated	*/
 	if (_is_identified == false)
@@ -305,6 +305,7 @@ bool	User::command_INVITE(t_command &command)
 	send_message(RPL_INVITING(_nick, _user, _name, invited_user->get_nick(), channel_name));
 	channel->invite_user(invited_user->get_fd());
 	send_message(INVITE(_nick, _user, _name, invited_user->get_nick(), channel_name));
+	return true;
 }
 
 /**
@@ -318,9 +319,6 @@ bool	User::command_INVITE(t_command &command)
  */
 bool	User::command_PART(t_command &command)
 {
-	std::cout << "Salut, Je m'appelle PART Command" << std::endl;
-	return true;
-
 	/*  ********************************************************************* */
                                 /*  Basic checks  */
     /*  ********************************************************************* */
@@ -383,8 +381,6 @@ bool	User::command_PART(t_command &command)
  */
 bool	User::command_KICK(t_command &command)
 {
-	std::cout << "Salut, Je m'appelle KICK Command" << std::endl;
-	return true;
 	/*	Basic tests	*/
 		/*	Not authorized	*/
 	if (_is_identified == false)
@@ -485,9 +481,6 @@ bool	User::command_KICK(t_command &command)
  */
 bool	User::command_MODE(t_command &command)
 {
-	std::cout << "Salut, Je m'appelle MODE Command" << std::endl;
-	return true;
-
 	/*	Basic tests	*/
 		/*	If not authenticated	*/
 	if (_is_identified == false)
@@ -678,3 +671,4 @@ bool	User::command_MODE(t_command &command)
 
 	/*	Just the values	*/
 }
+// /connect localhost 6667 test

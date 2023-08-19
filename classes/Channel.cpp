@@ -109,6 +109,7 @@ void	Channel::add_user(int fd_user)
 	//USEFULE FOR JOIN ^^^^^^^^
 	if (this->_fds_users.empty())
 		this->_fds_ops.push_back(fd_user);
+	cout << "^^^^^^^^^^^^^^^^^ADD USER^^^^^^^^^^^^^^^^^^^^^^" << endl;
 	this->_fds_users.push_back(fd_user);
 }
 
