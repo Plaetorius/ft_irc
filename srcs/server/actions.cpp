@@ -118,6 +118,9 @@ void	execute_commands(t_command &command, User *user)
 		} else if (command.command == "INVITE") {
 			result = user->command_INVITE(command);
 		} else {
+			// cout << "Je suis pas Dumb!" << endl;
+			// cout << command.command << command.last_param << endl;
+
 			continue ;
 		}
 	}

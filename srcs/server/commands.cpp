@@ -113,7 +113,7 @@ bool	User::command_NICK(t_command &command)
         {
             User    *user = g_data_ptr->users[g_data_ptr->open_fds[i]];
             if (user->get_identification() == true && user->get_fd() != this->_fd)
-                user->send_message(CHANGE_NICKNAME(user->get_nick(), param));
+                user->send_message(CHANGE_NICKNAME(_nick, _user, "localhost", param));
         }
     }
 

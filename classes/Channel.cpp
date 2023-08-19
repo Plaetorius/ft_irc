@@ -241,7 +241,7 @@ void	Channel::print_names(int target_fd)
 		if (users_fd_beg != users_fd_end)
 			users_info += " ";
 	}
-	cout << "Users info: " << users_info << endl;
+	// cout << "Users info: " << users_info << endl;
 	target_user->send_message(RPL_NAMREPLY(_name, target_user->get_nick(), target_user->get_user(), "localhost", users_info));
 	target_user->send_message(RPL_ENDOFNAMES(_name, target_user->get_nick(), target_user->get_user(), "localhost"));
 }
