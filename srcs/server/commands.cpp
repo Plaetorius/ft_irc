@@ -112,7 +112,7 @@ bool	User::command_NICK(t_command &command)
         for (size_t i = 0; i < g_data_ptr->open_fds.size(); i++)
         {
             User    *user = g_data_ptr->users[g_data_ptr->open_fds[i]];
-            if (user->get_identification() == true && user->get_fd() != this->_fd)
+            if (user->get_identification() == true)
                 user->send_message(CHANGE_NICKNAME(_nick, _user, "localhost", param));
         }
     }
@@ -125,7 +125,7 @@ bool	User::command_NICK(t_command &command)
     if (this->_has_user && this->_has_password && !this->_is_identified)
     {
         this->_is_identified = true;
-        this->send_message(RPL_WELCOME(_nick, _user, int_to_string(g_data_ptr->port)));
+        this->send_message(RPL_WELCOME(_nick, _user, int_to_string(g_data_ptr->port), "localhost"));
     }
     return true;
 }
@@ -167,7 +167,7 @@ bool	User::command_USER(t_command &command)
 	if (_has_user && _has_nick && !_is_identified)
 	{
 		this->_is_identified = true;
-		send_message(RPL_WELCOME(_nick, _user, int_to_string(g_data_ptr->port)));
+		send_message(RPL_WELCOME(_nick, _user, int_to_string(g_data_ptr->port), "localhost"));
 	} 
 	return true;
 }

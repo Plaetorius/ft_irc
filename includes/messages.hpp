@@ -2,7 +2,7 @@
 # define MESSAGES_HPP
 
 /*  General messages    */
-# define    RPL_WELCOME(nick, user, port) ("001 " + nick + " :Welcome to the " + port + " Network, " + nick + "[!" + user + "@" + LOCAL_HOST + "]\r\n")
+# define    RPL_WELCOME(nick, user, port, host) ("001 " + nick + " :Welcome to the " + port + " Network, " + nick + "!" + user + "@" + host + "\r\n")
 
 # define	INVITE(nick, user, name, nickinvite, channel)  ("" + nick + "!" + user + "@" + name + " INVITE " + nickinvite + " " + channel + "\r\n")
 # define	MODE(nick, user, host, mode) (":" + nick + "!" + user + "@" + host + " MODE " + mode)
@@ -14,7 +14,7 @@
 # define    ERR_NONICKNAMEGIVEN(client) ("431 " + client + " :No nickname given\r\n")
 # define    ERR_ERRONEUSNICKNAME(client, nick) ("432 " + client + " " + nick + " :Erroneus nickname\r\n")
 # define    ERR_NICKNAMEINUSE(client, nick) ("433 " + client + " " + nick + " :Nickname is alreay in use\r\n")
-# define    CHANGE_NICKNAME(old_nick, user, host, nick) (old_nick + "!" + user + "@" + host + " NICK " + nick + "\r\n")
+# define    CHANGE_NICKNAME(old_nick, user, host, nick) (":" + old_nick + "!" + user + "@" + host + " NICK " + nick + "\r\n")
 # define    PERMISSIONDENIED(command) ("ERROR " + command + " :You must provide a valid password using the PASS command before accessing any function\r\n")
 # define    ERR_NOSUCHNICKCHANNEL(nick) ("401 " + nick + " : No such nick\r\n")
 // # define    PRIVMSG(nick, user, host, dest, str) (":" + nick + "!" + user + "@" + host + " PRIVMSG " + dest + " :" + str + "\r\n")
