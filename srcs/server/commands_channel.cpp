@@ -22,7 +22,7 @@ bool	User::command_JOIN(t_command &command)
                                 /*  Basic checks  */
     /*  ********************************************************************* */
 	if (_is_identified == false) {
-		send_message(PERMISSIONDENIED(command.command));
+		send_message(ERR_NOPRIVILEGES(_nick));
 		return false;
 	}
 	if (command.parameters.size() < 1) {
@@ -99,7 +99,7 @@ bool	User::command_TOPIC(t_command &command)
 
 	if (_is_identified == false)
 	{
-		send_message(PERMISSIONDENIED(command.command));
+		send_message(ERR_NOPRIVILEGES(_nick));
 		return false;
 	}
 	if (command.parameters.size() == 0)
@@ -197,7 +197,7 @@ bool	User::command_names(t_command &command)
 
 	/*	Basic tests	*/
 	if (_is_identified == false) {
-		send_message(PERMISSIONDENIED(command.command));
+		send_message(ERR_NOPRIVILEGES(_nick));
 		return false;
 	}
 	if (command.parameters.size() == 0) {
@@ -234,7 +234,7 @@ bool	User::command_INVITE(t_command &command)
 		/*	If not authenticated	*/
 	if (_is_identified == false)
 	{
-		send_message(PERMISSIONDENIED(command.command));
+		send_message(ERR_NOPRIVILEGES(_nick));
 		return false;
 	}
 		/*	If not enough parameters	*/
@@ -322,7 +322,7 @@ bool	User::command_PART(t_command &command)
 		/*	If not authenticated	*/
 	if (_is_identified == false)
 	{
-		send_message(PERMISSIONDENIED(command.command));
+		send_message(ERR_NOPRIVILEGES(_nick));
 		return false;
 	}
 		/*	If not enough parameters	*/
@@ -381,7 +381,7 @@ bool	User::command_KICK(t_command &command)
 		/*	Not authorized	*/
 	if (_is_identified == false)
 	{
-		send_message(PERMISSIONDENIED(command.command));
+		send_message(ERR_NOPRIVILEGES(_nick));
 		return false;
 	}
 		/*	Need more params	*/	// <comment> can be empty or don't exist
@@ -481,7 +481,7 @@ bool	User::command_MODE(t_command &command)
 		/*	If not authenticated	*/
 	if (_is_identified == false)
 	{
-		send_message(PERMISSIONDENIED(command.command));
+		send_message(ERR_NOPRIVILEGES(_nick));
 		return false;
 	}
 		/*	If not enough parameters	*/

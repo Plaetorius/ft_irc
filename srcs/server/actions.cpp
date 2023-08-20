@@ -121,6 +121,8 @@ void	execute_commands(t_command &command, User *user)
 			// cout << "Je suis pas Dumb!" << endl;
 			// cout << command.command << command.last_param << endl;
 
+			/*	There is ERR_UNKNOW_COMMAND	*/
+			/*	Integrate	*/
 			continue ;
 		}
 	}

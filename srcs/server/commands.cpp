@@ -50,16 +50,18 @@ bool	User::command_NICK(t_command &command)
 				/*	Check if password is set	*/
 	/*  ********************************************************************* */
 	if (!_has_password) {
-		send_message(PERMISSIONDENIED(command.command));
+		send_message(ERR_NOPRIVILEGES(int_to_string(_id)));
 		return false;
 	}
 
     /*  ********************************************************************* */
     /*  Check if proper number of parameters    */
     /*  ********************************************************************* */
-    if (command.parameters.size() == 0)
-    {
-        send_message(ERR_NONICKNAMEGIVEN(int_to_string(this->_id)));
+    if (command.parameters.size() == 0){
+        if (_has_nick == 1)
+            send_message(ERR_NONICKNAMEGIVEN(_nick));
+        else
+            send_message(ERR_NONICKNAMEGIVEN(int_to_string(this->_id)));
         return false;
     }
 
@@ -70,11 +72,12 @@ bool	User::command_NICK(t_command &command)
     char        firstChar = param[0];
 
     /*  Check first */
-    if (!(isalpha(firstChar) || firstChar == '[' || firstChar == ']' || 
-                                firstChar == '{' || firstChar == '}' || 
-                                firstChar == '\\' || firstChar == '|'))
+    if (!(isalpha(firstChar) || firstChar == '[' || firstChar == ']' || firstChar == '{' || firstChar == '}' ||  firstChar == '\\' || firstChar == '|'))
     {
-        send_message(ERR_ERRONEUSNICKNAME(int_to_string(this->_id), param));
+        if (_has_nick == 1)
+            send_message(ERR_ERRONEUSNICKNAME(_nick, param));
+        else
+            send_message(ERR_ERRONEUSNICKNAME(int_to_string(this->_id), param));
         return false;
     }
 
@@ -82,9 +85,7 @@ bool	User::command_NICK(t_command &command)
     for (size_t i = 1; i < param.length(); ++i)
     {
         char ch = param[i];
-        if (!(isalnum(ch) || ch == '[' || ch == ']' || ch == '{' 
-                            || ch == '}' || ch == '\\' || ch == '|'))
-        {
+        if (!(isalnum(ch) || ch == '[' || ch == ']' || ch == '{' || ch == '}' || ch == '\\' || ch == '|')) {
             send_message(ERR_ERRONEUSNICKNAME(int_to_string(this->_id), param));
             return false;
         }
@@ -96,12 +97,8 @@ bool	User::command_NICK(t_command &command)
     for (size_t i = 0; i < g_data_ptr->open_fds.size(); i++)
     {
         if (g_data_ptr->users[g_data_ptr->open_fds[i]]->get_nick() == param)
-        {
             if (g_data_ptr->open_fds[i] != this->_fd)
-            {
                 param = param + "_";
-            }
-        }
     }
 
     /*  ********************************************************************* */
@@ -146,15 +143,24 @@ bool	User::command_USER(t_command &command)
 								/*	Small checks	*/
 	/*	********************************************************************* */
 	if (!_has_password) {
-		send_message(PERMISSIONDENIED(command.command));
+        if (_has_nick == 1)
+		    send_message(ERR_NOPRIVILEGES(_nick));
+        else
+            send_message(ERR_NOPRIVILEGES(int_to_string(_id)));
 		return false;
 	}
 	if (command.last_param.empty() == true || command.parameters.size() == 0) {
-		send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "USER"));
+        if (_has_nick == 1)
+            send_message(ERR_NEEDMOREPARAMS(_nick, "USER"));
+        else
+    	    send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "USER"));
 		return false;
 	}
 	if (_has_user) {
-		send_message(ERR_ALREADYREGISTERED(int_to_string(_id)));
+        if (_has_nick == 1)
+            send_message(ERR_ALREADYREGISTERED(_nick));
+        else
+    	    send_message(ERR_ALREADYREGISTERED(int_to_string(_id)));
 		return false;
 	}
 
@@ -183,7 +189,10 @@ bool	User::command_PING(t_command &command)
 					/*	Check the number of parameters	*/
 	/*	********************************************************************* */
 	if (command.parameters.size() == 0) {
-		send_message(ERR_NEEDMOREPARAMS(_nick, "PING"));
+        if (_has_nick == 1)
+            send_message(ERR_NEEDMOREPARAMS(_nick, "PING"));
+        else
+    	    send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "PING"));
 		return false;
 	}
 
@@ -191,9 +200,9 @@ bool	User::command_PING(t_command &command)
 						/*	Answer to the request	*/
 	/*	********************************************************************* */
 	if (_is_identified == false)
-		send_message("PING :" + command.parameters.front() + "\r\n");
+        send_message(PING(user_id(_nick, _user, "localhost"), command.parameters.front()));
 	else
-		send_message("PONG :" + command.parameters.front() + "\r\n");
+		send_message(PONG(user_id(_nick, _user, "localhost"), command.parameters.front()));
 	return true;
 }
 
@@ -210,7 +219,7 @@ bool	User::command_OPER(t_command &command)
 							/*	Basic checks	*/
 	/*	********************************************************************* */
 	if (_is_identified == false) {
-		send_message(PERMISSIONDENIED(command.command));
+		send_message(ERR_NOPRIVILEGES(_nick));
 		return false;
 	}
 	if (command.parameters.size() < 2) {
@@ -221,8 +230,7 @@ bool	User::command_OPER(t_command &command)
 	/*	********************************************************************* */
 						/*	Check the user and password	*/
 	/*	********************************************************************* */
-	if (command.parameters.front() != LOGIN || command.parameters.back() != PASSWORD)
-	{
+	if (command.parameters.front() != LOGIN || command.parameters.back() != PASSWORD) {
 		send_message(ERR_PASSWDMISMATCH(_nick));
 		return false;
 	}
@@ -251,7 +259,7 @@ int		User::command_KILL(t_command &command)
                                 /*  Basic tests */
     /*	********************************************************************* */
     if (_is_identified == false) {
-		send_message(PERMISSIONDENIED(command.command));
+		send_message(ERR_NOPRIVILEGES(_nick));
 		return false;
 	}
 	if (command.parameters.size() < 1) {
@@ -374,7 +382,7 @@ bool	User::command_PRIVMSG(t_command &command)
 {
     /*  Basic tests */
     if (_is_identified == false) {
-		send_message(PERMISSIONDENIED(command.command));
+		send_message(ERR_NOPRIVILEGES(_nick));
 		return false;
 	}
 	if (command.parameters.size() < 1) {
@@ -428,7 +436,7 @@ bool	User::command_NOTICE(t_command &command)
 {
     /*  Basic tests */
     if (_is_identified == false) {
-		send_message(PERMISSIONDENIED(command.command));
+		send_message(ERR_NOPRIVILEGES(_nick));
 		return false;
 	}
 	if (command.parameters.size() < 2) {
