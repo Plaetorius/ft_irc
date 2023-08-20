@@ -10,6 +10,9 @@ typedef struct	s_bot
 	struct sockaddr_in	addr_socket;
 	int					port;
 	string 				password;
+	string				channel;
+	string				server_reply;
+	string				result;
 }						t_bot;
 
 #endif

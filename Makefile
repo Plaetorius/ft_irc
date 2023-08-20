@@ -74,13 +74,23 @@ bonus: ${OBJS} ${BOT_OBJ}
 
 clean:
 	@echo "${CYAN}Cleaned ${NAME}${NC}"
-	@${RM} ${OBJS} ${DEPS}
+	@${RM} ${OBJS} ${MAIN_OBJ} ${DEPS}
 
 fclean:
 	@echo "${CYAN}FCleaned ${NAME}${NC}"
-	@${RM} ${OBJS} ${NAME} ${DEPS}
+	@${RM} ${OBJS} ${NAME} ${MAIN_OBJ} ${DEPS}
 
 re: fclean all
+
+bonus_clean:
+	@echo "${CYAN}Cleaned Tosser${NC}"
+	@${RM} ${BOBJS} ${BOT_OBJ} ${DEPS}
+
+bonus_fclean:
+	@echo "${CYAN}Cleaned Tosser${NC}"
+	@${RM} ${BOBJS} tosser ${BOT_OBJ} ${DEPS}
+
+bonus_re: bonus_fclean bonus
 
 -include ${DEPS}
 

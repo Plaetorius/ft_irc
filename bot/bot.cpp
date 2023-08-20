@@ -7,10 +7,13 @@
 	This bot is called Tosser
 
 	It checks PRIVMSG and NOTICE commands.
-	If the last parameter of these commands is : !tosser, the bot responds with a Head or Tail message
+	If the last parameter of these commands is : ?tosser, the bot responds with a Head or Tail message
 
 	Every time someones write "!toss", it will toss a coin and write the result, in the form of Head or Tail
+	Do not put the "#" before the channel name for the parameter channel (3)
 */
+
+t_bot	*g_bot_ptr;
 
 
 static string	tosser()
@@ -24,8 +27,7 @@ static string	tosser()
 
 static bool init_bot(t_bot &bot)
 {
-	int		sock_opt_val = 1;
-	string	auth = "PASS " + bot.password + "\r\nUSER tosser tosser localhost bot\r\nNICK tosser\r\n"; 
+	string	auth = "PASS " + bot.password + "\r\nUSER tosser tosser localhost bot\r\nNICK tosser\r\nJOIN " + bot.channel + "\r\n"; 
 	char	server_message[READ_SIZE + 1];
 	int		read_size;
 
@@ -44,15 +46,14 @@ static bool init_bot(t_bot &bot)
 	read_size = recv(bot.fd_socket, server_message, READ_SIZE, 0);
 	if (read_size == -1)
 		return close(bot.fd_socket), error_str("recv() error when authenticating");
-	if (string(server_message, read_size).find("433") != string::npos)
-		return close(bot.fd_socket), error_str("Only ONE tosser is allowed on the server");
 	fcntl(bot.fd_socket, F_SETFL, O_NONBLOCK);
+	if (string(server_message, read_size).find("433") != string::npos)
+		return close(bot.fd_socket), error_str("Only ONE tosser is allowed on the server. You shall die.");
 	return true;
 }
 
 static int	socket_read(t_bot &bot, string &server_reply, char *buff)
 {
-
 	int read_size = -1;
 
 	bzero(buff, READ_SIZE + 1);
@@ -61,59 +62,67 @@ static int	socket_read(t_bot &bot, string &server_reply, char *buff)
 	return read_size;
 }
 
-static User* find_by_nick(string &nick)
-{
-	t_users users = g_data_ptr->users;
-	t_users::iterator it = users.begin();
-	t_users::iterator ite = users.end();
-
-	for (; it != ite; it++)
-		if (nick == it->second->get_nick())
-			return it->second;
-	return NULL;
-}
-
-static void clean_bot(t_bot &bot)
-{
-	close(bot.fd_socket);
-}
-
 static bool	run_bot(t_bot &bot)
 {
-	string	nick;
-	string	server_reply;
-	string	answer;
 	char	server_message[READ_SIZE + 1];
+	int		read_size;
 
 	while (true)
 	{
-		while (socket_read(bot, server_reply, server_message) == READ_SIZE)
-			;		
-		if (server_reply.find("PRIVMSG") == string::npos)
+		sleep(1);
+		do read_size = socket_read(bot, bot.server_reply, server_message); while (read_size == READ_SIZE);
+		if (bot.server_reply.find("PRIVMSG") == string::npos)
 			continue;
-		server_reply = string(server_reply, 0, server_reply.size() - 2);
-		if (server_reply.at(0) == ':')
-			nick = string(server_reply, 1, server_reply.find("!") - 1);
-		if (server_reply.find_last_of(":") != string::npos && server_reply.find("NICK") == string::npos)
+		if (bot.server_reply.find_last_of(":") != string::npos && bot.server_reply.find("NICK") == string::npos)
 		{
-			answer = string(server_reply, server_reply.find_last_of(":") + 1, server_reply.size() - 1);
-			cout << "Found nick: " << nick << endl;
+			if (bot.server_reply.find("?tosser") != string::npos)
+			{
+				bot.result = "PRIVMSG " + bot.channel + " :" + tosser();
+				send(bot.fd_socket, bot.result.c_str(), bot.result.size(), 0);
+			}
+			else if (bot.server_reply.find("irc") != string::npos)
+			{
+				bot.result = "PRIVMSG "  + bot.channel + " :akalimol & tgernez are my masters.";
+				send(bot.fd_socket, bot.result.c_str(), bot.result.size(), 0);
+			}
 		}
+		bot.result.clear();
+		bot.server_reply.clear();
 	}
+}
+
+void	signal_handler(int code)
+{
+	(void)code;
+	sleep(1);
+	close(g_bot_ptr->fd_socket);
+	g_bot_ptr->result.~string();
+	g_bot_ptr->server_reply.~string();
+	exit(EXIT_SUCCESS);
 }
 
 int main(int argc, char *argv[])
 {
-	t_bot	bot;
+	t_bot				bot;
+	struct sigaction	sa;
 
-	if (argc != 3)
-		return (error_str("tosser requires 2 arguments. Usage: ./tosser <PORT> <PASSWORD>"), EXIT_FAILURE);
+	if (argc != 4)
+		return (error_str("tosser requires 3 arguments. Usage: ./tosser <PORT> <PASSWORD> <CHANNEL>"), EXIT_FAILURE);
 	if (!parsing(argv, bot.port, bot.password))
 		return (EXIT_FAILURE);
-	cout << "Tosser passed parsing" << endl;
+	bot.channel = argv[3];
+	if (bot.channel.empty())
+		return (error_str("Wrong channel name (must start without the # and not be empty)"), EXIT_FAILURE);
+	bot.channel = "#" + bot.channel;
 	if (!init_bot(bot))
 		return (EXIT_FAILURE);
-	cout << "Init passed parsing" << endl;
+	g_bot_ptr = &bot;  
+	sa.sa_handler = signal_handler;
+	sa.sa_flags = SA_RESTART; 					//Set to 0 if causes problems with syscalls
+	sigfillset(&sa.sa_mask);					//Blocks the other signals when the handler is called
+	if (sigaction(SIGINT, &sa, NULL) < 0)
+		return (close(bot.fd_socket), error_str("sigaction() error"), EXIT_FAILURE);
+	cout << "Connected to channel " + bot.channel << " and listenning" << endl;
 	if (!run_bot(bot))
 		return (EXIT_FAILURE);
 	return (EXIT_SUCCESS);
