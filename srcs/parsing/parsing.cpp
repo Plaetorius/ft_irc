@@ -1,5 +1,7 @@
 #include "IRC.hpp"
 
+t_data	*g_data_ptr;
+
 static bool parse_port(char *port_str, int &port)
 {
 	char *end_ptr = NULL;

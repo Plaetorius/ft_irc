@@ -30,8 +30,8 @@ using namespace std;
 # define LOCAL_HOST "127.0.0.1"
 # define READ_SIZE	512 			//Max message size. 510 "usable characters". 2 last ones MUST be \r\n
 # define DEBUG false
-# define	LOGIN "login"
-# define    PASSWORD "password"
+# define LOGIN "login"
+# define PASSWORD "password"
 
 typedef map<int, User*> 		t_users; 	//Users will be mapped key: fd; User*: User corresponding to the fd
 typedef map<string, Channel *>	t_channels; //Key: channel name; Channel*: corresponding Channel

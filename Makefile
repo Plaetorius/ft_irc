@@ -1,12 +1,11 @@
-NAME	= ircserv
-CC		= c++
-DEP_FLAG= -MMD
-FLAGS	= -Wall -Wextra ${C98} ${DEP_FLAG} -g3 #-----------------ADD WERROR
-C98		= -std=c++98
-INCL	= -I includes
+NAME     = ircserv
+CC       = c++
+DEP_FLAG = -MMD
+C98      = -std=c++98
+FLAGS    = -Wall -Wextra ${C98} ${DEP_FLAG} -g3
+INCL     = -I includes
 SRCS	=	$(addsuffix .cpp,		\
 			$(addprefix srcs/,		\
-				main				\
 			$(addprefix parsing/,	\
 				parsing				\
 				input				\
@@ -41,20 +40,16 @@ BONUS	= 	$(addsuffix .cpp,		\
 			$(addprefix bot/,		\
 				bot					\
 			)						\
-			$(addprefix utils/,		\
-				trim_spaces			\
-				int_to_string		\
-			)						\
-			$(addprefix error/,		\
-				error_str			\
-			)						\
+			$(addprefix srcs/,		\
 			$(addprefix parsing/,	\
 				parsing				\
-			))
-OBJS	= ${SRCS:.cpp=.o} ${CLAS:.cpp=.o}
-BOBJS	= ${BONUS:.cpp=.o} ${CLAS:.cpp=.o}
-DEPS	= ${OBJS:.o=.d}
-BDEPS	= ${BOBJS:.o=.d}
+			)))
+MAIN_OBJ = srcs/main.o
+BOT_OBJ  = bot/bot.o
+OBJS    = ${SRCS:.cpp=.o} ${CLAS:.cpp=.o}
+BOBJS   = ${BONUS:.cpp=.o} ${CLAS:.cpp=.o}
+DEPS    = ${OBJS:.o=.d}
+BDEPS   = ${BOBJS:.o=.d}
 RM		:= rm -rf
 RED		:= \033[1;31m
 NC		:= \033[0m
@@ -67,18 +62,15 @@ CYAN	:= \033[1;36m
 	@echo "${CYAN}Compiling $< ${NC}"
 	@${CC} ${FLAGS} -o $@ -c $< ${INCL}
 
-${NAME}: ${OBJS}
-	@${CC} ${FLAGS} ${OBJS} ${INCL} -o $@ 
+${NAME}: ${OBJS} ${MAIN_OBJ}
+	@${CC} ${FLAGS} ${OBJS} ${MAIN_OBJ} ${INCL} -o $@ 
 	@echo "${LGREEN}Successfully created ${NC}${CYAN}${NAME}${NC}${LGREEN}!${NC}"
 
 all: ${NAME}
 
-bonus: ${BOBJS}
-	@${CC} -g3 ${FLAGS} ${BOBJS} ${INCL} -o $@ 
+bonus: ${OBJS} ${BOT_OBJ}
+	@${CC} -g3 ${FLAGS} ${OBJS} ${BOT_OBJ} ${INCL} -o tosser
 	@echo "${LGREEN}Successfully created ${NC}${CYAN}Tosser${NC}${LGREEN}!${NC}"
-
-test: re 
-	@make fclean
 
 clean:
 	@echo "${CYAN}Cleaned ${NAME}${NC}"
@@ -92,4 +84,4 @@ re: fclean all
 
 -include ${DEPS}
 
-.PHONY: all clean fclean re test bonus
+.PHONY: all clean fclean re bonus
