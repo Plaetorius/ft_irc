@@ -253,7 +253,7 @@ bool	User::command_OPER(t_command &command)
 	}
 
 	send_message(RPL_YOUREOPER(_nick));
-    server->operator_fds.push_back(_id);
+    server->operator_fds.push_back(_fd);
 	return true;
 }
 
@@ -277,15 +277,15 @@ int		User::command_KILL(t_command &command)
     /*	********************************************************************* */
     if (_is_identified == false) {
 		send_message(ERR_NOPRIVILEGES(_nick));
-		return false;
+		return -1;
 	}
 	if (command.parameters.size() < 1) {
 		send_message(ERR_NEEDMOREPARAMS(_nick, "KILL"));
-		return false;
+		return -1;
 	}
     if (is_operator() == false) {
         send_message(ERR_NOPRIVILEGES(_nick));
-        return false;
+        return -1;
     }
 
     /*	********************************************************************* */
@@ -295,7 +295,7 @@ int		User::command_KILL(t_command &command)
     target_user = User::getUser(target_nick, server);
     if (target_user == NULL) {
         send_message(ERR_NOSUCHNICKCHANNEL(target_nick));
-        return false;
+        return -1;
     }
     if (command.last_param.size() == 0)
         has_reason = 0;
@@ -490,4 +490,15 @@ bool	User::command_NOTICE(t_command &command)
         myUser->send_message(PRIVMSG(_nick, _user, "localhost", param_str, command.last_param));
     }
     return true;
+}
+
+bool     User::command_unknown(t_command &command)
+{
+    cout << "Was I here?" << endl;
+    if (_has_nick)
+        send_message(ERR_UNKNOWNCOMMAND(_nick, command.command));
+    else
+        send_message(ERR_UNKNOWNCOMMAND(int_to_string(_id), command.command));
+    return (false);
+
 }

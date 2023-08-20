@@ -78,6 +78,8 @@ void	execute_commands(t_command &command, User *user)
 		cout << "Command: " << command.command << "\n Parameters: ";
 		for (size_t i = 0; i < command.parameters.size(); i++)
 			cout << command.parameters.at(i) << ", ";
+		if (command.last_param.size() != 0)
+			cout << command.last_param;
 		cout << endl << endl;
 
 		if (command.command == "PASS") {
@@ -99,10 +101,10 @@ void	execute_commands(t_command &command, User *user)
 			quit_fd = user->command_QUIT(command);
 			user_disconnection(*g_data_ptr, quit_fd);
 			break;
-		} else if (command.command == "KILL") {
+		} else if (command.command == "KILL" || command.command == "kill") {
 			quit_fd = user->command_KILL(command);
-			user_disconnection(*g_data_ptr, quit_fd);
-			break;
+			if (quit_fd != -1)
+				user_disconnection(*g_data_ptr, quit_fd);
 		} else if (command.command == "PART") {
 			result = user->command_PART(command);
 		} else if (command.command == "KICK") {
