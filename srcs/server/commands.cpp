@@ -415,14 +415,12 @@ bool	User::command_PRIVMSG(t_command &command)
         Channel *myChannel = Channel::getChannel(param_str.substr(0));
 
         /*  If channel doesn't exist    */ /* Error */
-        if (!myChannel)
+        if (!myChannel) {
        		send_message(ERR_NOSUCHCHANNEL(_nick, param_str));
-        else
-        {
-            cout << "Channel: " << myChannel->get_name() << ": " << command.last_param << endl; 
-            myChannel->broadcast(PRIVMSG(_nick, _user, "localhost", param_str, command.last_param), _fd);
+            return false;
         }
-            /*  Broadcast to everybody  */
+        // cout << "Channel: " << myChannel->get_name() << ": " << command.last_param << endl;
+        myChannel->broadcast(PRIVMSG2(_nick, _user, "localhost", param_str, command.last_param), _fd);
     }
     /*  else param is user  */
     else
@@ -457,7 +455,7 @@ bool	User::command_NOTICE(t_command &command)
 		return false;
 	}
 	if (command.parameters.size() < 2) {
-		send_message(ERR_NEEDMOREPARAMS(_nick, "PRIVMSG"));
+		send_message(ERR_NEEDMOREPARAMS(_nick, "NOTICE"));
 		return false;
 	}
 
@@ -469,11 +467,12 @@ bool	User::command_NOTICE(t_command &command)
         Channel *myChannel = Channel::getChannel(param_str.substr(1));
 
         /*  If channel doesn't exist    */ /* Error */
-        if (!myChannel)
+        if (!myChannel) {
        		send_message(ERR_NOSUCHCHANNEL(_nick, param_str));
             return false;
+        }
         /*  Broadcast to everybody  */
-        myChannel->broadcast(command.last_param, _fd);
+        myChannel->broadcast(PRIVMSG2(_nick, _user, "localhost", param_str, command.last_param), _fd);
     }
     /*  else param is user  */
     else
