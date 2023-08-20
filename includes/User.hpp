@@ -57,6 +57,7 @@ class User
 		bool	command_TOPIC(t_command &command);
 		bool	command_NOTICE(t_command &command);
 		bool	command_INVITE(t_command &command);
+		bool	command_unknown(t_command &command);
 
 
 		/*	Static function	*/

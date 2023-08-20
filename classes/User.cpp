@@ -52,7 +52,7 @@ User *User::getUser(std::string nick, t_data *server)
     while (user_begin != user_end)
     {
         myUser = server->users.at(*user_begin);
-        if (nick.compare(myUser->get_nick()))
+        if (nick == myUser->get_nick())
             return (myUser);
         user_begin++;
     }
@@ -62,11 +62,18 @@ User *User::getUser(std::string nick, t_data *server)
 bool    User::is_operator(void)
 {
     vector<int>  operators;
+    vector<int>::iterator beg;
+    vector<int>::iterator end;
 
     operators = this->server->operator_fds; 
-
-    if (std::find(operators.begin(), operators.end(), _fd) != operators.end())
-        return true;
+    beg = operators.begin();
+    end = operators.end();
+    while (beg != end)
+    {
+        if (*beg == _fd)
+            return true;
+        beg++;
+    }
     return false;
 }
 
