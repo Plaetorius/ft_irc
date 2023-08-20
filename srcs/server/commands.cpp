@@ -58,10 +58,11 @@ bool	User::command_NICK(t_command &command)
     /*  Check if proper number of parameters    */
     /*  ********************************************************************* */
     if (command.parameters.size() == 0){
-        if (_has_nick == 1)
+        if (_has_nick == 1) {
             send_message(ERR_NONICKNAMEGIVEN(_nick));
-        else
+        } else {
             send_message(ERR_NONICKNAMEGIVEN(int_to_string(this->_id)));
+        }
         return false;
     }
 
@@ -74,10 +75,11 @@ bool	User::command_NICK(t_command &command)
     /*  Check first */
     if (!(isalpha(firstChar) || firstChar == '[' || firstChar == ']' || firstChar == '{' || firstChar == '}' ||  firstChar == '\\' || firstChar == '|'))
     {
-        if (_has_nick == 1)
+        if (_has_nick == 1) {
             send_message(ERR_ERRONEUSNICKNAME(_nick, param));
-        else
+        } else {
             send_message(ERR_ERRONEUSNICKNAME(int_to_string(this->_id), param));
+        }
         return false;
     }
 
@@ -96,9 +98,11 @@ bool	User::command_NICK(t_command &command)
     /*  ********************************************************************* */
     for (size_t i = 0; i < g_data_ptr->open_fds.size(); i++)
     {
-        if (g_data_ptr->users[g_data_ptr->open_fds[i]]->get_nick() == param)
-            if (g_data_ptr->open_fds[i] != this->_fd)
+        if (g_data_ptr->users[g_data_ptr->open_fds[i]]->get_nick() == param) {
+            if (g_data_ptr->open_fds[i] != this->_fd) {
                 param = param + "_";
+            }
+        }
     }
 
     /*  ********************************************************************* */
@@ -143,25 +147,28 @@ bool	User::command_USER(t_command &command)
 								/*	Small checks	*/
 	/*	********************************************************************* */
 	if (!_has_password) {
-        if (_has_nick == 1)
+        if (_has_nick == 1) {
 		    send_message(ERR_NOPRIVILEGES(_nick));
-        else
+        } else {
             send_message(ERR_NOPRIVILEGES(int_to_string(_id)));
-		return false;
+        }
+        return false;
 	}
-	if (command.last_param.empty() == true || command.parameters.size() == 0) {
-        if (_has_nick == 1)
+	if (command.parameters.size() == 0) {
+        if (_has_nick == 1) {
             send_message(ERR_NEEDMOREPARAMS(_nick, "USER"));
-        else
+        } else {
     	    send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "USER"));
-		return false;
+        }
+        return false;
 	}
 	if (_has_user) {
-        if (_has_nick == 1)
+        if (_has_nick == 1) {
             send_message(ERR_ALREADYREGISTERED(_nick));
-        else
+        } else {
     	    send_message(ERR_ALREADYREGISTERED(int_to_string(_id)));
-		return false;
+        }
+        return false;
 	}
 
 	/*	********************************************************************* */
@@ -188,22 +195,32 @@ bool	User::command_PING(t_command &command)
 	/*	********************************************************************* */
 					/*	Check the number of parameters	*/
 	/*	********************************************************************* */
-	if (command.parameters.size() == 0) {
-        if (_has_nick == 1)
-            send_message(ERR_NEEDMOREPARAMS(_nick, "PING"));
-        else
-    	    send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "PING"));
-		return false;
-	}
+	// if (command.parameters.size() == 0) {
+    //     if (_has_nick == 1) {
+    //         send_message(ERR_NEEDMOREPARAMS(_nick, "PING"));
+    //     } else {
+    // 	    send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "PING"));
+    //     }
+    //     return false;
+	// }
 
 	/*	********************************************************************* */
 						/*	Answer to the request	*/
 	/*	********************************************************************* */
-	if (_is_identified == false)
-        send_message(PING(user_id(_nick, _user, "localhost"), command.parameters.front()));
-	else
-		send_message(PONG(user_id(_nick, _user, "localhost"), command.parameters.front()));
-	return true;
+	if (_is_identified == false) {
+        if (command.parameters.size() == 0) {
+            send_message(PING(int_to_string(_id), ""));
+        } else {
+            send_message(PING(int_to_string(_id), command.parameters.front()));
+        }
+    } else {
+        if (command.parameters.size() == 0) {
+            send_message(PONG(user_id(_nick, _user, "localhost"), ""));
+        } else {
+    		send_message(PONG(user_id(_nick, _user, "localhost"), command.parameters.front()));
+        }
+    }
+    return true;
 }
 
 /**

@@ -26,7 +26,7 @@
 # define    PING(user_id, param) (user_id + " PING :" + param + "\r\n")
 # define    PONG(user_id, param) (user_id + " PONG :" + param + "\r\n")
 /*  Oper messages   */
-# define    RPL_YOUREOPER(nick) ("381 " + nick + " :You are now an IRC operator")
+# define    RPL_YOUREOPER(nick) ("381 " + nick + " :You are now an IRC operator\r\n")
 /*  QUIT   */
 # define    QUIT_WREASON(nick, reason) (nick + " :is exiting the channel, because " + reason + "\r\n")
 # define    QUIT_WOREASON(nick) (nick + " : is exiting the channel\r\n")
