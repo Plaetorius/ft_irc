@@ -77,11 +77,13 @@ static bool	run_bot(t_bot &bot)
 		{
 			if (bot.server_reply.find("?tosser") != string::npos)
 			{
+				cout << "?tosser command " << endl;
 				bot.result = "PRIVMSG " + bot.channel + " :" + tosser();
 				send(bot.fd_socket, bot.result.c_str(), bot.result.size(), 0);
 			}
 			else if (bot.server_reply.find("irc") != string::npos)
 			{
+				cout << "Master command" << endl;
 				bot.result = "PRIVMSG "  + bot.channel + " :akalimol & tgernez are my masters.";
 				send(bot.fd_socket, bot.result.c_str(), bot.result.size(), 0);
 			}
