@@ -58,6 +58,8 @@
 # define    RPL_ENDOFNAMES(channel, nick, user, host) ("366 " + nick + "!" + user + "@" + host + " = " + channel + " :End of NAMES list\r\n")
 /*  KICK    */
 
+/*  PART    */
+# define RPL_PART(user_id, channel, reason) (user_id + " PART #" + channel + " " + (reason.empty() ? "." : reason ) + "\r\n")
 /*  Topic   */
 # define	RPL_TOPIC(nick, user, name, channel, topic) (": 332 " + nick + "!" + user + "@" + name + " " + channel + " :" + topic + "\r\n")
 # define	RPL_NOTOPIC(nick, user, name, channel) (": 331 " + nick + "!" + user + "@" + name + " " + channel + " :No topic is set\r\n")

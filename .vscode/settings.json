@@ -11,6 +11,7 @@
 		"string_view": "cpp",
 		"ranges": "cpp",
 		"typeinfo": "cpp",
-		"functional": "cpp"
+		"functional": "cpp",
+		"new": "cpp"
 	}
 }

@@ -22,8 +22,12 @@ bool	User::command_JOIN(t_command &command)
                                 /*  Basic checks  */
     /*  ********************************************************************* */
 	if (_is_identified == false) {
-		send_message(ERR_NOPRIVILEGES(_nick));
-		return false;
+        if (_has_nick == 1) {
+    		send_message(ERR_NOPRIVILEGES(_nick));
+        } else {
+            send_message(ERR_NOPRIVILEGES(int_to_string(_id)));
+        }
+    	return false;
 	}
 	if (command.parameters.size() < 1) {
 		send_message(ERR_NEEDMOREPARAMS(_nick, "JOIN"));
@@ -62,21 +66,18 @@ bool	User::command_JOIN(t_command &command)
 			return false;
 		}
 		channel->add_user(_fd);
-		channel->broadcast(JOIN(_nick, _user, "localhost",  channel_name), _fd);
-		if (channel->get_topic_set() == true)
-			send_message(RPL_TOPIC(_nick, _user, _name, channel_name, channel->get_topic()));
-		channel->print_names(_fd);
 	}
 	else
 	{
 		channel = new Channel(channel_name, _fd);
 		send_message(CREATEDCHANNEL(channel_name));
 		g_data_ptr->channels[channel_name] = channel;
-		
-		channel->broadcast(JOIN(_nick, _user, "localhost", channel_name), _fd);
-		// channel->add_user(_fd);
-		// send_message(RPL_TOPIC(_nick, _user, _name, channel_name, channel->get_topic()));
+		// channel->broadcast(JOIN(_nick, _user, "localhost", channel_name), _fd);
 	}
+	channel->broadcast(JOIN(_nick, _user, "localhost",  channel_name), _fd);
+	if (channel->get_topic_set() == true)
+		send_message(RPL_TOPIC(_nick, _user, _name, channel_name, channel->get_topic()));
+	channel->print_names(_fd);
 	_channels.push_back(channel);
 	return true;
 }
@@ -97,10 +98,13 @@ bool	User::command_TOPIC(t_command &command)
 							/*	General checks	*/
 	/*  ********************************************************************* */
 
-	if (_is_identified == false)
-	{
-		send_message(ERR_NOPRIVILEGES(_nick));
-		return false;
+	if (_is_identified == false) {
+        if (_has_nick == 1) {
+    		send_message(ERR_NOPRIVILEGES(_nick));
+        } else {
+            send_message(ERR_NOPRIVILEGES(int_to_string(_id)));
+        }
+    	return false;
 	}
 	if (command.parameters.size() == 0)
 	{
@@ -197,8 +201,12 @@ bool	User::command_names(t_command &command)
 
 	/*	Basic tests	*/
 	if (_is_identified == false) {
-		send_message(ERR_NOPRIVILEGES(_nick));
-		return false;
+        if (_has_nick == 1) {
+    		send_message(ERR_NOPRIVILEGES(_nick));
+        } else {
+            send_message(ERR_NOPRIVILEGES(int_to_string(_id)));
+        }
+    	return false;
 	}
 	if (command.parameters.size() == 0) {
 		send_message(ERR_NEEDMOREPARAMS(_nick, "NAMES"));
@@ -232,10 +240,13 @@ bool	User::command_INVITE(t_command &command)
 {
 	/*	Basic tests	*/
 		/*	If not authenticated	*/
-	if (_is_identified == false)
-	{
-		send_message(ERR_NOPRIVILEGES(_nick));
-		return false;
+	if (_is_identified == false) {
+        if (_has_nick == 1) {
+    		send_message(ERR_NOPRIVILEGES(_nick));
+        } else {
+            send_message(ERR_NOPRIVILEGES(int_to_string(_id)));
+        }
+    	return false;
 	}
 		/*	If not enough parameters	*/
 	if (command.parameters.size() != 2)
@@ -320,14 +331,16 @@ bool	User::command_PART(t_command &command)
     /*  ********************************************************************* */
 	/*	Basic tests	*/
 		/*	If not authenticated	*/
-	if (_is_identified == false)
-	{
-		send_message(ERR_NOPRIVILEGES(_nick));
-		return false;
+	if (_is_identified == false) {
+        if (_has_nick == 1) {
+    		send_message(ERR_NOPRIVILEGES(_nick));
+        } else {
+            send_message(ERR_NOPRIVILEGES(int_to_string(_id)));
+        }
+    	return false;
 	}
 		/*	If not enough parameters	*/
-	if (command.parameters.size() == 0)
-	{
+	if (command.parameters.size() == 0) {
 		send_message(ERR_NEEDMOREPARAMS(_nick, "PART"));
 		return false;
 	}
@@ -336,18 +349,14 @@ bool	User::command_PART(t_command &command)
 
 		/*	If channel doesn't exist  */
 			/*	ERR_NOSUCHCHANNEL	*/
-	string channel_name = command.parameters.at(0);
-	t_channels::iterator it_channels = g_data_ptr->channels.find(channel_name);
-	if (it_channels == g_data_ptr->channels.end())
-	{
+	string	channel_name = command.parameters.at(0); 
+	Channel	*channel = Channel::getChannel(channel_name);
+	
+	if (channel == NULL) {
 		send_message(ERR_NOSUCHCHANNEL(_nick, channel_name));
 		return false;
 	}
-	Channel *channel = it_channels->second;
-		/*	If not on channel	*/
-			/*	ERR_NOTONCHANNEL	*/
-	if (channel->is_user(_fd) == false)
-	{
+	if (channel->is_user(_fd) == false) {
 		send_message(ERR_NOTONCHANNEL(channel_name));
 		return false;
 	}
@@ -379,10 +388,13 @@ bool	User::command_KICK(t_command &command)
 {
 	/*	Basic tests	*/
 		/*	Not authorized	*/
-	if (_is_identified == false)
-	{
-		send_message(ERR_NOPRIVILEGES(_nick));
-		return false;
+	if (_is_identified == false) {
+        if (_has_nick == 1) {
+    		send_message(ERR_NOPRIVILEGES(_nick));
+        } else {
+            send_message(ERR_NOPRIVILEGES(int_to_string(_id)));
+        }
+    	return false;
 	}
 		/*	Need more params	*/	// <comment> can be empty or don't exist
 	if (command.parameters.size() != 2)
@@ -479,10 +491,13 @@ bool	User::command_MODE(t_command &command)
 {
 	/*	Basic tests	*/
 		/*	If not authenticated	*/
-	if (_is_identified == false)
-	{
-		send_message(ERR_NOPRIVILEGES(_nick));
-		return false;
+	if (_is_identified == false) {
+        if (_has_nick == 1) {
+    		send_message(ERR_NOPRIVILEGES(_nick));
+        } else {
+            send_message(ERR_NOPRIVILEGES(int_to_string(_id)));
+        }
+    	return false;
 	}
 		/*	If not enough parameters	*/
 	if (command.parameters.size() < 1)

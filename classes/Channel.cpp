@@ -121,6 +121,8 @@ void	Channel::kick_user(int fd_to_kick)
 void	Channel::part(int fd_user)
 {
 	this->_fds_users.erase(find(this->_fds_users.begin(), this->_fds_users.end(), fd_user));
+	if (is_op(fd_user) == true)
+		this->_fds_ops.erase(find(this->_fds_ops.begin(), this->_fds_ops.end(), fd_user));
 }
 
 void	Channel::op_user(int fd_to_op)

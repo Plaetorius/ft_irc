@@ -236,8 +236,12 @@ bool	User::command_OPER(t_command &command)
 							/*	Basic checks	*/
 	/*	********************************************************************* */
 	if (_is_identified == false) {
-		send_message(ERR_NOPRIVILEGES(_nick));
-		return false;
+        if (_has_nick == 1) {
+    		send_message(ERR_NOPRIVILEGES(_nick));
+        } else {
+            send_message(ERR_NOPRIVILEGES(int_to_string(_id)));
+        }
+    	return false;
 	}
 	if (command.parameters.size() < 2) {
 		send_message(ERR_NEEDMOREPARAMS(_nick, "OPER"));
@@ -276,8 +280,12 @@ int		User::command_KILL(t_command &command)
                                 /*  Basic tests */
     /*	********************************************************************* */
     if (_is_identified == false) {
-		send_message(ERR_NOPRIVILEGES(_nick));
-		return -1;
+        if (_has_nick == 1) {
+    		send_message(ERR_NOPRIVILEGES(_nick));
+        } else {
+            send_message(ERR_NOPRIVILEGES(int_to_string(_id)));
+        }
+    	return false;
 	}
 	if (command.parameters.size() < 1) {
 		send_message(ERR_NEEDMOREPARAMS(_nick, "KILL"));
@@ -399,42 +407,46 @@ bool	User::command_PRIVMSG(t_command &command)
 {
     /*  Basic tests */
     if (_is_identified == false) {
-		send_message(ERR_NOPRIVILEGES(_nick));
-		return false;
+        if (_has_nick == 1) {
+    		send_message(ERR_NOPRIVILEGES(_nick));
+        } else {
+            send_message(ERR_NOPRIVILEGES(int_to_string(_id)));
+        }
+    	return false;
 	}
-	if (command.parameters.size() < 1) {
+	if (command.parameters.size() < 1 || (command.parameters.size() == 1 && command.last_param.size() == 0)) {
 		send_message(ERR_NEEDMOREPARAMS(_nick, "PRIVMSG"));
 		return false;
 	}
 
-    std::string param_str = command.parameters.front();
+    std::string target = command.parameters.front();
 
     /*  if param is channel */
-    if (param_str[0] == '#')
+    if (target[0] == '#')
     {
-        Channel *myChannel = Channel::getChannel(param_str.substr(0));
+        Channel *target_channel = Channel::getChannel(target.substr(0));
 
         /*  If channel doesn't exist    */ /* Error */
-        if (!myChannel) {
-       		send_message(ERR_NOSUCHCHANNEL(_nick, param_str));
+        if (!target_channel) {
+       		send_message(ERR_NOSUCHCHANNEL(_nick, target));
             return false;
         }
         // cout << "Channel: " << myChannel->get_name() << ": " << command.last_param << endl;
-        myChannel->broadcast(PRIVMSG2(_nick, _user, "localhost", param_str, command.last_param), _fd);
+        target_channel->broadcast(PRIVMSG2(_nick, _user, "localhost", target, command.last_param), _fd);
     }
     /*  else param is user  */
     else
     {
         /*  If the target user doesn't exist */
-        User    *myUser = User::getUser(param_str, server);
+        User    *target_user = User::getUser(target, server);
 
-        if (!myUser) {
-            send_message(ERR_NOSUCHNICKCHANNEL(param_str));
+        if (!target_user) {
+            send_message(ERR_NOSUCHNICKCHANNEL(target));
             return false;
         }
 
         /*  Send the message    */
-        myUser->send_message(PRIVMSG(_nick, _user, "localhost", param_str, command.last_param));
+        target_user->send_message(PRIVMSG(_nick, _user, "localhost", target, command.last_param));
     }
     return true;
 }
@@ -451,42 +463,46 @@ bool	User::command_NOTICE(t_command &command)
 {
     /*  Basic tests */
     if (_is_identified == false) {
-		send_message(ERR_NOPRIVILEGES(_nick));
-		return false;
+        if (_has_nick == 1) {
+    		send_message(ERR_NOPRIVILEGES(_nick));
+        } else {
+            send_message(ERR_NOPRIVILEGES(int_to_string(_id)));
+        }
+    	return false;
 	}
-	if (command.parameters.size() < 2) {
+	if (command.parameters.size() < 1 || (command.parameters.size() == 1 && command.last_param.size() == 0)) {
 		send_message(ERR_NEEDMOREPARAMS(_nick, "NOTICE"));
 		return false;
 	}
 
-    std::string param_str = command.parameters.front();
+    std::string target = command.parameters.front();
 
     /*  if param is channel */
-    if (param_str[0] == '#')
+    if (target[0] == '#')
     {
-        Channel *myChannel = Channel::getChannel(param_str.substr(1));
+        Channel *target_channel = Channel::getChannel(target.substr(1));
 
         /*  If channel doesn't exist    */ /* Error */
-        if (!myChannel) {
-       		send_message(ERR_NOSUCHCHANNEL(_nick, param_str));
+        if (!target_channel) {
+       		send_message(ERR_NOSUCHCHANNEL(_nick, target));
             return false;
         }
         /*  Broadcast to everybody  */
-        myChannel->broadcast(PRIVMSG2(_nick, _user, "localhost", param_str, command.last_param), _fd);
+        target_channel->broadcast(PRIVMSG2(_nick, _user, "localhost", target, command.last_param), _fd);
     }
     /*  else param is user  */
     else
     {
         /*  If the target user doesn't exist */
-        User    *myUser = User::getUser(param_str, server);         // This one is not a proper way
+        User    *target_user = User::getUser(target, server);
 
-        if (!myUser) {
-            send_message(ERR_NOSUCHNICKCHANNEL(param_str));
-            return false;      
+        if (!target_user) {
+            send_message(ERR_NOSUCHNICKCHANNEL(target));
+            return false;
         }
     
         /*  Send the message    */
-        myUser->send_message(PRIVMSG(_nick, _user, "localhost", param_str, command.last_param));
+        target_user->send_message(PRIVMSG(_nick, _user, "localhost", target, command.last_param));
     }
     return true;
 }
