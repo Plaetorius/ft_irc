@@ -215,11 +215,13 @@ void	Channel::broadcast(string message, int fd_emitter)
 	vector<int>::iterator ite = this->_fds_users.end();
 
 	message += "\r\n";
-	for (; it != ite; it++)
+	while (it != ite)
 	{
-		if (fd_emitter != -1 && *it != fd_emitter) {
+		if (fd_emitter == -1 || *it != fd_emitter) {
+			// cout << "I was here with" << *it << " fd" << endl; 
 			write(*it, message.c_str(), message.size());
 		}
+		it++;
 	}
 }
 

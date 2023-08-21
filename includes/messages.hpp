@@ -45,7 +45,7 @@
 # define 	ERR_USERONCHANNEL(nick, invitenick, channel) (": 443 " + nick + " " + invitenick + " " + channel + ":is already on channel\r\n")
 # define    ERR_BADCHANMASK(channel) (": 476 " + channel + " :Bad Channel Mask\r\n")
 /*  Join    */
-# define    JOIN(nick, user, host, channel) (": localhost" + nick + "!" + user + "@" + host + " JOIN :" + channel + "\r\n")
+# define    JOIN(nick, user, host, channel) (":" + nick + "!" + user + "@" + host + " JOIN :" + channel)
 # define    CREATEDCHANNEL(channel) (channel + " channel created\r\n")
 # define    ERR_INVITEONLYCHAN(nick, channel) (": 473 " + nick + " " + channel + " :Cannot join channel (+i)")
 # define    ERR_BADCHANNELKEY(nick, channel) (": 475 " + nick + " " + channel + " :Cannot join channel (+k)\r\n")
@@ -59,7 +59,7 @@
 /*  KICK    */
 
 /*  PART    */
-# define    PART_WOREASON(nick, user, host, channel) (":" + nick + "!" + user + "@" + host + " PART " + channel + " .")
+# define    PART_WOREASON(nick, user, host, channel) (":" + nick + "!" + user + "@" + host + " PART " + channel + " :Default reason")
 # define    PART_WREASON(nick, user, host, channel, reason) (":" + nick + "!" + user + "@" + host + " PART " + channel + " :" + reason)
 /*  Topic   */
 # define	RPL_TOPIC(nick, user, name, channel, topic) (": 332 " + nick + "!" + user + "@" + name + " " + channel + " :" + topic + "\r\n")

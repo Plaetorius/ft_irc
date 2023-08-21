@@ -74,9 +74,8 @@ bool	User::command_JOIN(t_command &command)
 		channel = new Channel(channel_name, _fd);
 		send_message(CREATEDCHANNEL(channel_name));
 		g_data_ptr->channels[channel_name] = channel;
-		// channel->broadcast(JOIN(_nick, _user, "localhost", channel_name), _fd);
 	}
-	channel->broadcast(JOIN(_nick, _user, "localhost",  channel_name), _fd);
+	channel->broadcast(JOIN(_nick, _user, "localhost",  channel_name), -1);
 	if (channel->get_topic_set() == true)
 		send_message(RPL_TOPIC(_nick, _user, _name, channel_name, channel->get_topic()));
 	channel->print_names(_fd);
@@ -356,7 +355,7 @@ bool	User::command_PART(t_command &command)
 
 		/*	If channel doesn't exist  */
 			/*	ERR_NOSUCHCHANNEL	*/
-	string	channel_name = command.parameters.at(0); 
+	string	channel_name = command.parameters.front(); 
 	Channel	*channel = Channel::getChannel(channel_name);
 	
 	if (channel == NULL) {
@@ -370,7 +369,6 @@ bool	User::command_PART(t_command &command)
 	/*	If OK	*/
 		/*	Notify everybody that client quitted the channel  */
 	if (command.has_last_param == false) {
-		// cout << "I was in WREASON! " << PART_WOREASON(_nick, _user, "localhost", channel_name) << endl;
 		channel->broadcast(PART_WOREASON(_nick, _user, "localhost", channel_name), -1);
 	} else {
 		// cout << "I was in WREASON! " << PART_WREASON(_nick, _user, "localhost", channel_name, command.last_param) << endl;
