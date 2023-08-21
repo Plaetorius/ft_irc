@@ -151,9 +151,9 @@ bool	User::command_TOPIC(t_command &command)
 		send_message(ERR_CHANOPRIVSNEEDED(user_id(_nick, _user, "localhost"), channel_name));
 		return false;
 	}
-	if (command.last_param.size() == 0) {
+	if (command.last_param.size() <= 1) {
 		channel->unset_topic();
-		channel->broadcast(RPL_NOTOPIC2(_nick, _user, "localhost", channel_name), -1);
+		channel->broadcast(RPL_TOPIC2(_nick, _user, "localhost", channel_name, ""), -1);
 	} else {
 		channel->set_topic(command.last_param);
 		channel->broadcast(RPL_TOPIC2(_nick, _user, "localhost", channel_name, command.last_param), -1);
