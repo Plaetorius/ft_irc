@@ -431,7 +431,12 @@ bool	User::command_PRIVMSG(t_command &command)
        		send_message(ERR_NOSUCHCHANNEL(_nick, target));
             return false;
         }
-        // cout << "Channel: " << myChannel->get_name() << ": " << command.last_param << endl;
+
+        //  I need to check here if I am in the channel!!!!!!!!!!!!
+        if (target_channel->is_user(_fd) == false) {
+            send_message(ERR_NOTONCHANNEL(target));
+            return false;
+        }
         target_channel->broadcast(PRIVMSG2(_nick, _user, "localhost", target, command.last_param), _fd);
     }
     /*  else param is user  */

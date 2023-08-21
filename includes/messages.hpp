@@ -45,21 +45,22 @@
 # define 	ERR_USERONCHANNEL(nick, invitenick, channel) (": 443 " + nick + " " + invitenick + " " + channel + ":is already on channel\r\n")
 # define    ERR_BADCHANMASK(channel) (": 476 " + channel + " :Bad Channel Mask\r\n")
 /*  Join    */
-# define    JOIN(nick, user, host, channel) (":" + nick + "!" + user + "@" + host + " JOIN :" + channel + "\r\n")
+# define    JOIN(nick, user, host, channel) (": localhost" + nick + "!" + user + "@" + host + " JOIN :" + channel + "\r\n")
 # define    CREATEDCHANNEL(channel) (channel + " channel created\r\n")
 # define    ERR_INVITEONLYCHAN(nick, channel) (": 473 " + nick + " " + channel + " :Cannot join channel (+i)")
 # define    ERR_BADCHANNELKEY(nick, channel) (": 475 " + nick + " " + channel + " :Cannot join channel (+k)\r\n")
 # define    ERR_CHANNELISFULL(nick, channel) (": 471 " + nick + " " + channel + " :Cannot join channel (+l)\r\n") 
 /*  Invite  */
 # define	INVITE(nick, user, name, nickinvite, channel)  (":" + nick + "!" + user + "@" + name + " INVITE " + nickinvite + " " + channel + "\r\n")
-# define 	RPL_INVITING(nick, user, name, invitenick, channel) ("341 " + nick + "!" + user + "@" + name + " " + invitenick + " " + channel + "\r\n")
+# define 	RPL_INVITING(nick, user, name, invitenick, channel) (": 341 " + nick + "!" + user + "@" + name + " " + invitenick + " " + channel + "\r\n")
 /*  Names   */
-# define    RPL_NAMREPLY(channel, nick, user, host, users) ("353 " + nick + "!" + user + "@" + host + " = " + channel + " :" + users + "\r\n")
-# define    RPL_ENDOFNAMES(channel, nick, user, host) ("366 " + nick + "!" + user + "@" + host + " = " + channel + " :End of NAMES list\r\n")
+# define    RPL_NAMREPLY(channel, nick, user, host, users) (": 353 " + nick + "!" + user + "@" + host + " = " + channel + " :" + users + "\r\n")
+# define    RPL_ENDOFNAMES(channel, nick, user, host) (": 366 " + nick + "!" + user + "@" + host + " " + channel + " :End of /NAMES list.\r\n")
 /*  KICK    */
 
 /*  PART    */
-# define RPL_PART(user_id, channel, reason) (user_id + " PART #" + channel + " " + (reason.empty() ? "." : reason ) + "\r\n")
+# define    PART_WOREASON(nick, user, host, channel) (":" + nick + "!" + user + "@" + host + " PART " + channel + " .")
+# define    PART_WREASON(nick, user, host, channel, reason) (":" + nick + "!" + user + "@" + host + " PART " + channel + " :" + reason)
 /*  Topic   */
 # define	RPL_TOPIC(nick, user, name, channel, topic) (": 332 " + nick + "!" + user + "@" + name + " " + channel + " :" + topic + "\r\n")
 # define	RPL_NOTOPIC(nick, user, name, channel) (": 331 " + nick + "!" + user + "@" + name + " " + channel + " :No topic is set\r\n")
