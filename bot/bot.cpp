@@ -98,7 +98,7 @@ static bool	run_bot(t_bot &bot)
 			}
 			else if (bot.server_reply.find("transcendence") != string::npos)
 			{
-				cout << "feur command" << endl;
+				cout << "transcendence command" << endl;
 				bot.result = "PRIVMSG "  + bot.channel + " :transcendenceRIZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 				send(bot.fd_socket, bot.result.c_str(), bot.result.size(), 0);	
 			}
