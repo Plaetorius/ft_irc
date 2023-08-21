@@ -66,6 +66,7 @@ static bool	run_bot(t_bot &bot)
 {
 	char	server_message[READ_SIZE + 1];
 	int		read_size;
+	size_t	pos;
 
 	while (true)
 	{
@@ -73,8 +74,10 @@ static bool	run_bot(t_bot &bot)
 		do read_size = socket_read(bot, bot.server_reply, server_message); while (read_size == READ_SIZE);
 		if (bot.server_reply.find("PRIVMSG") == string::npos)
 			continue;
-		if (bot.server_reply.find_last_of(":") != string::npos && bot.server_reply.find("NICK") == string::npos)
+		pos = bot.server_reply.find_last_of(":");
+		if (pos != string::npos && bot.server_reply.find("NICK") == string::npos)
 		{
+			bot.server_reply = bot.server_reply.substr(pos + 1);
 			if (bot.server_reply.find("?tosser") != string::npos)
 			{
 				cout << "?tosser command " << endl;
@@ -86,6 +89,18 @@ static bool	run_bot(t_bot &bot)
 				cout << "Master command" << endl;
 				bot.result = "PRIVMSG "  + bot.channel + " :akalimol & tgernez are my masters.";
 				send(bot.fd_socket, bot.result.c_str(), bot.result.size(), 0);
+			}
+			else if (bot.server_reply.find("quoi") != string::npos ||  bot.server_reply.find("Quoi") != string::npos ||  bot.server_reply.find("QUOI") != string::npos)
+			{
+				cout << "feur command" << endl;
+				bot.result = "PRIVMSG "  + bot.channel + " :feur";
+				send(bot.fd_socket, bot.result.c_str(), bot.result.size(), 0);	
+			}
+			else if (bot.server_reply.find("transcendence") != string::npos)
+			{
+				cout << "transcendence command" << endl;
+				bot.result = "PRIVMSG "  + bot.channel + " :transcendenceRIZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+				send(bot.fd_socket, bot.result.c_str(), bot.result.size(), 0);	
 			}
 		}
 		bot.result.clear();
