@@ -28,10 +28,10 @@
 /*  Oper messages   */
 # define    RPL_YOUREOPER(nick) ("381 " + nick + " :You are now an IRC operator\r\n")
 /*  QUIT   */
-# define    QUIT_WREASON(nick, reason) (nick + " :is exiting the channel, because " + reason + "\r\n")
-# define    QUIT_WOREASON(nick) (nick + " : is exiting the channel\r\n")
+# define    QUIT(user_id, reason) (user_id + " QUIT :" + reason + "\r\n")
+# define    QUIT2(user_id, reason) (user_id + " QUIT :" + reason)
 /*  Kill    */
-# define    KILL_WREASON(source, reason) ("You have been disconeected from the server by " + source + ", because " + reason + "\r\n")
+# define    KILL(source, reason) ("You have been disconeected from the server by " + source + ", because " + reason + "\r\n")
 # define    KILL_WOREASON(source) ("You have been disconeected from the server by " + source + "\r\n")
 /*  ****************************************************************************** */
 
