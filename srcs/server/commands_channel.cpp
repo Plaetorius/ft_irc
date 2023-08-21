@@ -395,8 +395,9 @@ bool	User::command_PART(t_command &command)
  */
 bool	User::command_KICK(t_command &command)
 {
-	/*	Basic tests	*/
-		/*	Not authorized	*/
+	/*	********************************************************************* */
+								/*	Basic tests	*/
+	/*	********************************************************************* */
 	if (_is_identified == false) {
         if (_has_nick == 1) {
     		send_message(ERR_NOPRIVILEGES(_nick));
@@ -405,84 +406,57 @@ bool	User::command_KICK(t_command &command)
         }
     	return false;
 	}
-		/*	Need more params	*/	// <comment> can be empty or don't exist
-	if (command.parameters.size() != 2)
-	{
+	if (command.parameters.size() < 2) {
 		send_message(ERR_NEEDMOREPARAMS(_nick, "KICK"));
 		return false;
 	}
-	/*	If channel doesn't exist	*/
-		/*	ERR_NOSUCHCHANNEL	*/
-		/*	exit  */
-	string channel_name = command.parameters.at(0);
-	t_channels::iterator it_channels = g_data_ptr->channels.find(channel_name);
-	if (it_channels == g_data_ptr->channels.end())
-	{
+
+	/*	********************************************************************* */
+				/*	Get the information from the user	*/
+	/*	********************************************************************* */
+	string	channel_name = command.parameters.at(0);
+	string	target_name	= command.parameters.at(1);
+	Channel	*channel = Channel::getChannel(channel_name);
+	User	*target_user = User::getUser(target_name, server);
+
+	if (channel == NULL) {
 		send_message(ERR_NOSUCHCHANNEL(_nick, channel_name));
 		return false;
 	}
-	Channel *channel = it_channels->second;
-	/*	If the target user doesn't exist	*/
-		/*	CUSTOM_MESSAGE	*/
-		/*	exit	*/
-	t_users::iterator it_users = g_data_ptr->users.begin();	
-	t_users::iterator ite_users = g_data_ptr->users.end();	
-	for (; it_users != ite_users; it_users++)
-	{
-		if (it_users->second->get_nick() == command.parameters.at(1))
-			break; 
-	}
-	if (it_users == ite_users)
-	{
+	if (target_user == NULL) {
 		send_message(ERR_NOSUCHNICKCHANNEL(command.parameters.at(1)));
 		return false;
 	}
-	User *kick_user = it_users->second;
-
-	/*	If the user not in the channel	*/
-		/*	ERR_NOTONCHANNEL	*/
-		/*	Exit	*/
-	if (channel->is_user(_fd) == false)
-	{
+	if (channel->is_user(_fd) == false) {
 		send_message(ERR_NOTONCHANNEL(channel_name));
 		return false;
 	}
-	/*	If no permission	*/
-		/*	ERR_CHANOPRIVSNEEDED */
-		/*	Exit	*/
-	if (channel->is_op(_fd) == false)
-	{
+	if (channel->is_op(_fd) == false) {
 		send_message(ERR_CHANOPRIVSNEEDED(channel_name));
 		return false;
 	}
-	/*	If the target user not in Channel	*/
-		/*	ERR_USERNOTINCHANNEL */
-		/*	Exit	*/
-	if (channel->is_user(kick_user->get_fd()) == false)
-	{
-		send_message(ERR_USERNOTINCHANNEL(kick_user->get_nick(), channel_name));
+	if (channel->is_user(target_user->get_fd()) == false) {
+		send_message(ERR_USERNOTINCHANNEL(target_user->get_nick(), channel_name));
 		return false;
 	}
-	/*	Channel::kick_user()	*/
-	channel->kick_user(kick_user->get_fd());
-	/* Send message to kicked user and to channel */
-	string message;
-	if (command.has_last_param == true)
-	{
-		message = "You have been kicked of the channel " + channel_name + ": " + command.last_param;	
-		channel->broadcast(kick_user->get_nick() + " has been kicked of the channel " + channel_name + ": " + command.last_param, _fd);
+	
+	/*	********************************************************************* */
+					/*	Kick the user from the channel	*/
+	/*	********************************************************************* */
+
+	if (command.has_last_param == true) {
+		channel->broadcast(RPL_KICK2(user_id(_nick, _user, "localhost"), channel_name, target_name, command.last_param), -1);
+	} else {
+		channel->broadcast(RPL_KICK2(user_id(_nick, _user, "localhost"), channel_name, target_name, "Don't like your name"), -1);
 	}
-	else
-	{
-		message = "You have been kicked of the channel " + channel_name + ".";
-		channel->broadcast(kick_user->get_nick() + " has been kicked of the channel.", _fd);
-	}
-	write(kick_user->get_fd(), message.c_str(), message.size());
+	channel->kick_user(target_user->get_fd());
+	target_user->remove_channel(channel_name);
 
 	//If channel empty, remove Channel
 	if (channel->get_users().empty() == true)
 	{
-		g_data_ptr->channels.erase(channel->get_name());
+		// g_data_ptr->channels.erase(find(g_data_ptr->channels.begin(), g_data_ptr->channels.end(), channel->get_name()));
+		_channels.erase(find(_channels.begin(), _channels.end(), channel));
 		delete channel;
 	}
 	return true;

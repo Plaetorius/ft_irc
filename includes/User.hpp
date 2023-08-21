@@ -43,7 +43,6 @@ class User
 		bool	command_PASS(t_command &command);
 		bool	command_NICK(t_command &command);
 		bool	command_USER(t_command &command);
-
 		bool	command_PING(t_command &command);
 		bool	command_JOIN(t_command &command);
 		bool	command_names(t_command &command);
@@ -58,6 +57,8 @@ class User
 		bool	command_NOTICE(t_command &command);
 		bool	command_INVITE(t_command &command);
 		bool	command_unknown(t_command &command);
+
+		bool	remove_channel(string channel_name);
 
 
 		/*	Static function	*/

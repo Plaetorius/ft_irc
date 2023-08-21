@@ -62,8 +62,14 @@ bool	Channel::is_op(int fd_user)
 	vector<int>::iterator it = this->_fds_ops.begin();
 	vector<int>::iterator ite = this->_fds_ops.end();
 
-	for (; it != ite; it++)
-	{
+	for (; it != ite; it++) {
+		if (*it == fd_user)
+			return true;
+	}
+
+	it = g_data_ptr->operator_fds.begin();
+	ite = g_data_ptr->operator_fds.end();
+	for (; it != ite; it++) {
 		if (*it == fd_user)
 			return true;
 	}

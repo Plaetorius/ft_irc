@@ -57,6 +57,8 @@
 # define    RPL_NAMREPLY(channel, nick, user, host, users) (": 353 " + nick + "!" + user + "@" + host + " = " + channel + " :" + users + "\r\n")
 # define    RPL_ENDOFNAMES(channel, nick, user, host) (": 366 " + nick + "!" + user + "@" + host + " " + channel + " :End of /NAMES list.\r\n")
 /*  KICK    */
+# define RPL_KICK(user_id, channel, kicked, reason) (user_id + " KICK " + channel + " " + kicked + " " + reason + "\r\n")
+# define RPL_KICK2(user_id, channel, kicked, reason) (user_id + " KICK " + channel + " " + kicked + " " + reason)
 
 /*  PART    */
 # define    PART_WOREASON(nick, user, host, channel) (":" + nick + "!" + user + "@" + host + " PART " + channel + " :Default reason")
