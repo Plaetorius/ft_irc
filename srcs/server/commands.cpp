@@ -424,7 +424,7 @@ bool	User::command_PRIVMSG(t_command &command)
     /*  if param is channel */
     if (target[0] == '#')
     {
-        Channel *target_channel = Channel::getChannel(target.substr(0));
+        Channel *target_channel = Channel::getChannel(target);
 
         /*  If channel doesn't exist    */ /* Error */
         if (!target_channel) {
@@ -485,7 +485,7 @@ bool	User::command_NOTICE(t_command &command)
     /*  if param is channel */
     if (target[0] == '#')
     {
-        Channel *target_channel = Channel::getChannel(target.substr(1));
+        Channel *target_channel = Channel::getChannel(target);
 
         /*  If channel doesn't exist    */ /* Error */
         if (!target_channel) {
