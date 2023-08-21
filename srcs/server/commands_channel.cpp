@@ -76,8 +76,9 @@ bool	User::command_JOIN(t_command &command)
 		g_data_ptr->channels[channel_name] = channel;
 	}
 	channel->broadcast(JOIN(_nick, _user, "localhost",  channel_name), -1);
-	if (channel->get_topic_set() == true)
-		send_message(RPL_TOPIC(_nick, _user, _name, channel_name, channel->get_topic()));
+	if (channel->get_topic_set() == true) {
+		send_message(RPL_TOPIC(_nick, _user, "localhost", channel_name, channel->get_topic()));
+	}
 	channel->print_names(_fd);
 	_channels.push_back(channel);
 	return true;
@@ -98,94 +99,65 @@ bool	User::command_TOPIC(t_command &command)
 	/*  ********************************************************************* */
 							/*	General checks	*/
 	/*  ********************************************************************* */
-
-	if (_is_identified == false) {
+	if (_is_identified == false)
+	{
         if (_has_nick == 1) {
     		send_message(ERR_NOPRIVILEGES(_nick));
         } else {
             send_message(ERR_NOPRIVILEGES(int_to_string(_id)));
         }
     	return false;
-	}
-	if (command.parameters.size() == 0)
-	{
+	} else if (command.parameters.size() == 0) {
 		send_message(ERR_NEEDMOREPARAMS(_nick, "TOPIC"));
 		return false;
 	}
-	string channel_name = command.parameters.front();
-	if (_channels.empty() == true)
-	{
+
+
+	/*  ********************************************************************* */
+						/*	Get user information	*/
+	/*  ********************************************************************* */
+	string	channel_name = command.parameters.front();
+	Channel	*channel = Channel::getChannel(channel_name);
+
+	if (channel == NULL) {
+		send_message(ERR_NOSUCHCHANNEL(_nick, channel_name));
+		return false;
+	} else if (channel->is_user(_fd) == false) {
 		send_message(ERR_NOTONCHANNEL(channel_name));
 		return false;
 	}
-	t_channels::iterator it = g_data_ptr->channels.find(channel_name);
-	if (it == g_data_ptr->channels.end())
-	{
-		send_message(ERR_NOSUCHCHANNEL(_nick, channel_name));
-		return false;
-	}
-	Channel *channel = it->second;
-
-	/*TODO	If not in channel	*/
-
-		/*	ERR_NOTONCHANNEL	*/
-		/*	QUIT	*/
 
 
 	/*  ********************************************************************* */
 							/*	Reading the topic	*/
 	/*  ********************************************************************* */
-
 	if (command.has_last_param == false)
 	{
-		if (channel->get_topic_set() == false)
-		{
-			send_message(RPL_NOTOPIC(_nick, _user, _name, channel_name));
-			return false;
+		if (channel->get_topic_set() == false) {
+			send_message(RPL_NOTOPIC(_nick, _user, "localhost", channel_name));
+		} else {
+			send_message(RPL_TOPIC(_nick, _user, "localhost", channel_name, channel->get_topic()));
 		}
-		else
-		{
-			send_message(RPL_TOPIC(_nick, _user, _name, channel_name, channel->get_topic()));
-			return true;
-		}
+		return true;
 	}
-	/*	If <topic>	not given	*/
-		/*	if topic not set in channel	*/
-			/*	RPL_NOTOPIC	*/
 
-		/*	else	*/
-			/*	RPL_TOPIC	*/
-			/*	RPL_TOPICWHOTIME	*/ 
-				// The info about who and at what time set the topic
-		/*	QUIT	*/
-	
 
 	/*  ********************************************************************* */
 							/*	Write the topic	*/
 	/*  ********************************************************************* */
 
-	else if (channel->get_topic_protected() == true && channel->is_op(_fd) == false)
-	{
-		send_message(ERR_CHANOPRIVSNEEDED(channel_name));
+
+	if (channel->get_topic_protected() == true && channel->is_op(_fd) == false) {
+		send_message(ERR_CHANOPRIVSNEEDED(user_id(_nick, _user, "localhost"), channel_name));
 		return false;
 	}
-	else if (command.last_param.empty() == true)
-	{
-		channel->set_topic("");
-		return true;
+	if (command.last_param.size() == 0) {
+		channel->unset_topic();
+		channel->broadcast(RPL_NOTOPIC2(_nick, _user, "localhost", channel_name), -1);
+	} else {
+		channel->set_topic(command.last_param);
+		channel->broadcast(RPL_TOPIC2(_nick, _user, "localhost", channel_name, command.last_param), -1);
 	}
-	channel->set_topic(command.last_param);
-	channel->broadcast(g_data_ptr->users.at(_fd)->get_nick() + " has changed topic to " + command.last_param, _fd);
-	/*	If protected mode and no permission	*/
-		/*	ERR_CHANOPRIVSNEEDED	*/
-		/*	QUIT	*/
-	
-	/*	If <topic> is an empty string */
-		/*	Clear the channel topic	*/
-		/*	QUIT	*/
-	
-	/*	Change the topic	*/
-	/*	Broadcast message that you changed the topic	*/
 	return true;
 }
 
@@ -302,7 +274,7 @@ bool	User::command_INVITE(t_command &command)
 		/*	EXIT	*/
 	if (channel->get_invite_only() == true && channel->is_op(_fd) == false)
 	{
-		send_message(ERR_CHANOPRIVSNEEDED(channel_name));
+		send_message(ERR_CHANOPRIVSNEEDED(user_id(_nick, _user, "localhost"), channel_name));
 		return false;	
 	}
 	/*	If user is on channel	*/
@@ -432,7 +404,7 @@ bool	User::command_KICK(t_command &command)
 		return false;
 	}
 	if (channel->is_op(_fd) == false) {
-		send_message(ERR_CHANOPRIVSNEEDED(channel_name));
+		send_message(ERR_CHANOPRIVSNEEDED(user_id(_nick, _user, "localhost"), channel_name));
 		return false;
 	}
 	if (channel->is_user(target_user->get_fd()) == false) {

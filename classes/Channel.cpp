@@ -182,10 +182,13 @@ void	Channel::set_invite_only(bool mode)
 void	Channel::set_topic(string topic)
 {
 	this->_is_topic_set = true;
-	if (topic.empty() == true)
-		this->_topic.clear();
-	else
-		this->_topic = topic;
+	this->_topic = topic;
+}
+
+void	Channel::unset_topic()
+{
+	this->_is_topic_set = false;
+	this->_topic = "";
 }
 
 void	Channel::set_protected_topic(bool mode)
@@ -287,7 +290,7 @@ vector<int>		Channel::get_ops(void) const {return this->_fds_ops;};
 vector<int>		Channel::get_invited(void) const {return this->_fds_invited;};
 bool			Channel::get_invite_only(void) const {return this->_is_invite_only;};
 string			Channel::get_topic(void) const {return this->_topic;}
-bool			Channel::get_topic_set(void) const {return this->_is_topic_set ;};
+bool			Channel::get_topic_set(void) const {return this->_is_topic_set;};
 bool			Channel::get_topic_protected(void) const {return this->_is_topic_protected ;};
 string			Channel::get_key(void) const {return this->_key ;};
 bool			Channel::get_channel_locked(void) const {return this->_is_channel_locked ;};

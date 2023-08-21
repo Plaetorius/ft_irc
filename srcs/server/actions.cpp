@@ -79,7 +79,7 @@ void	execute_commands(t_command &command, User *user)
 		for (size_t i = 0; i < command.parameters.size(); i++)
 			cout << command.parameters.at(i) << ", ";
 		if (command.last_param.size() != 0)
-			cout << command.last_param;
+			cout << "'Last:' " << command.last_param;
 		cout << endl << endl;
 
 		if (command.command == "PASS") {

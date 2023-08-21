@@ -38,6 +38,7 @@ class Channel
 
 		void			set_invite_only(bool mode);
 		void			set_topic(string topic);
+		void			unset_topic();
 		void			set_protected_topic(bool mode);
 		void			set_max_users(int max_users);
 		void			set_has_user_limit(bool mode);
