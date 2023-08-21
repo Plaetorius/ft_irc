@@ -65,6 +65,8 @@ bool	User::command_JOIN(t_command &command)
 			send_message(ERR_BADCHANNELKEY(_nick, channel_name));
 			return false;
 		}
+		if (channel->is_user(_fd) == true)
+			return true;
 		channel->add_user(_fd);
 	}
 	else
@@ -218,6 +220,11 @@ bool	User::command_names(t_command &command)
 		send_message(ERR_NOSUCHCHANNEL(_nick, target_channel->get_name()));
 		return false;
 	}
+	if (target_channel->is_user(_fd) == false)
+	{
+		send_message(ERR_NOTONCHANNEL(target_channel->get_name()));
+		return false;
+	}
 	target_channel->print_names(_fd);
 	return true;
 }
@@ -360,13 +367,17 @@ bool	User::command_PART(t_command &command)
 		send_message(ERR_NOTONCHANNEL(channel_name));
 		return false;
 	}
-		/*	If OK	*/
-			/*	Notify everybody that client quitted the channel  */
+	/*	If OK	*/
+		/*	Notify everybody that client quitted the channel  */
+	if (command.has_last_param == false) {
+		// cout << "I was in WREASON! " << PART_WOREASON(_nick, _user, "localhost", channel_name) << endl;
+		channel->broadcast(PART_WOREASON(_nick, _user, "localhost", channel_name), -1);
+	} else {
+		// cout << "I was in WREASON! " << PART_WREASON(_nick, _user, "localhost", channel_name, command.last_param) << endl;
+		channel->broadcast(PART_WREASON(_nick, _user, "localhost", channel_name, command.last_param), -1);
+	}
 	channel->part(_fd);
-	if (command.has_last_param == false)
-		channel->broadcast(_nick + " is leaving the channel " + channel_name, _fd);
-	else
-		channel->broadcast(_nick + " is leaving the channel " + channel_name + ": " + command.last_param, _fd);
+	_channels.erase(find(_channels.begin(), _channels.end(), channel));
 	/* If channel empty, remove it */
 	if (channel->get_users().empty() == true)
 	{

@@ -217,9 +217,9 @@ void	Channel::broadcast(string message, int fd_emitter)
 	message += "\r\n";
 	for (; it != ite; it++)
 	{
-		// cout << "I sended to " << int_to_string(*it) << endl; 
-		if (*it != fd_emitter)
+		if (fd_emitter != -1 && *it != fd_emitter) {
 			write(*it, message.c_str(), message.size());
+		}
 	}
 }
 
