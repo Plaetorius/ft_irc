@@ -4,14 +4,37 @@
 
 string	read_raw_input(int	user_fd, t_data &data)
 {
+	string 	res;
 	char	buffer[READ_SIZE + 1];
 	int		len_read;
 
 	bzero(buffer, READ_SIZE + 1);
 	len_read = read(user_fd, buffer, READ_SIZE);
 	if (len_read == -1)
-		clear_data_exit(data, "read() error", 1);
-	return string(buffer, len_read);
+	{
+		return "";
+	}
+	buffer[len_read] = '\0';
+	res.append(buffer);
+	if (res.find("\r\n") != string::npos)
+	{
+		return res;
+	}
+	while (true)
+	{
+		bzero(buffer, READ_SIZE + 1);
+		len_read = read(user_fd, buffer, READ_SIZE);
+		if (len_read > 0)
+		{
+			buffer[len_read] = '\0';
+			res.append(buffer);
+			if (res.find("\r\n") != string::npos)
+			{
+				return res;
+			}
+		}
+	}
+	return res;
 }
 
 t_command	parse_raw_input(string raw_input)
@@ -68,7 +91,7 @@ t_command	parse_raw_input(string raw_input)
 		}
 		if (raw_input.size() > 1 && raw_input[0] == ':')
 		{
-			result.last_param = raw_input.substr(1);
+			result.last_param = raw_input.substr(1, raw_input.size() - 2);
 			result.has_last_param = true;
 		}
 		else

@@ -16,11 +16,19 @@
 t_bot	*g_bot_ptr;
 
 
+static string	random_quoi()
+{
+	vector<string>	options;
+	options.push_back("feur");
+	options.push_back("drilatere");
+	options.push_back("coubeh");
+	return options.at(rand() % options.size());
+}
+
 static string	tosser()
 {
 	string message;
 
-	srand(time(NULL));
 	message = rand() % 2 ? "Head" : "Tail";
 	return message;
 }
@@ -81,25 +89,25 @@ static bool	run_bot(t_bot &bot)
 			if (bot.server_reply.find("?tosser") != string::npos)
 			{
 				cout << "?tosser command " << endl;
-				bot.result = "PRIVMSG " + bot.channel + " :" + tosser();
+				bot.result = "PRIVMSG " + bot.channel + " :" + tosser() + "\r\n";
 				send(bot.fd_socket, bot.result.c_str(), bot.result.size(), 0);
 			}
 			else if (bot.server_reply.find("irc") != string::npos)
 			{
 				cout << "Master command" << endl;
-				bot.result = "PRIVMSG "  + bot.channel + " :akalimol & tgernez are my masters.";
+				bot.result = "PRIVMSG "  + bot.channel + " :akalimol & tgernez are my masters.\r\n";
 				send(bot.fd_socket, bot.result.c_str(), bot.result.size(), 0);
 			}
 			else if (bot.server_reply.find("quoi") != string::npos ||  bot.server_reply.find("Quoi") != string::npos ||  bot.server_reply.find("QUOI") != string::npos)
 			{
 				cout << "feur command" << endl;
-				bot.result = "PRIVMSG "  + bot.channel + " :feur";
+				bot.result = "PRIVMSG "  + bot.channel + " :" + random_quoi() + "\r\n";
 				send(bot.fd_socket, bot.result.c_str(), bot.result.size(), 0);	
 			}
 			else if (bot.server_reply.find("transcendence") != string::npos)
 			{
 				cout << "transcendence command" << endl;
-				bot.result = "PRIVMSG "  + bot.channel + " :transcendenceRIZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+				bot.result = "PRIVMSG "  + bot.channel + " :transcendenceRIZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ\r\n";
 				send(bot.fd_socket, bot.result.c_str(), bot.result.size(), 0);	
 			}
 		}
@@ -140,6 +148,7 @@ int main(int argc, char *argv[])
 	if (sigaction(SIGINT, &sa, NULL) < 0)
 		return (close(bot.fd_socket), error_str("sigaction() error"), EXIT_FAILURE);
 	cout << "Connected to channel " + bot.channel << " and listenning" << endl;
+	srand(time(NULL));
 	if (!run_bot(bot))
 		return (EXIT_FAILURE);
 	return (EXIT_SUCCESS);

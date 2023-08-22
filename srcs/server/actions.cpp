@@ -140,66 +140,67 @@ static void	user_command(int user_fd, t_data &data)
 	vector<string>::iterator it_param, ite_param;
 	string	tmp;
 	
+	cout << "User_command()" << endl;
 	while (raw_input.empty() == false)
 	{
 		current = raw_input.substr(0, raw_input.find_first_of("\n"));
 		command = parse_raw_input(current);
-		if (DEBUG == true)
-		{
-			it = data.users.begin();
-			ite = data.users.end();
-			it_param = command.parameters.begin();
-			ite_param = command.parameters.end();
+		// if (DEBUG == true)
+		// {
+		// 	it = data.users.begin();
+		// 	ite = data.users.end();
+		// 	it_param = command.parameters.begin();
+		// 	ite_param = command.parameters.end();
 
-			tmp = "User " + int_to_string(data.users.at(user_fd)->get_id()) + ":\nprefix:";
-			// cout << tmp << endl;
-			if (command.prefix.empty() == false)
-			{
-				cout << command.prefix << endl;
-			}
-			// tmp = "command:";
-			// cout << tmp << endl;
-			// cout << command.command << endl;
-			// tmp = "parameters:";
-			// cout << tmp  << endl;
-			// for (; it_param != ite_param; it_param++)
-			// {
-			// 	cout << *it_param << endl;
-			// }
-			// tmp = "last parameter:";
-			// cout << tmp << endl;
-			// cout << command.last_param << endl;
-			for (; it != ite; it++)
-			{
-				if (it->second->get_fd() != user_fd)
-				{
-					tmp = "User " + int_to_string(data.users.at(user_fd)->get_id()) + ":\nprefix:\n";
-					write(it->second->get_fd(), tmp.c_str(), tmp.size());
-					if (command.prefix.empty() == false)
-					{
-						write(it->second->get_fd(), command.prefix.c_str(), command.prefix.size());
-					}
-					write(it->second->get_fd(), "\n", 1);
-					tmp = "command:\n";
-					write(it->second->get_fd(), tmp.c_str(), tmp.size());
-					write(it->second->get_fd(), command.command.c_str(), command.command.size());
-					write(it->second->get_fd(), "\n", 1);
-					tmp = "parameters:\n";
-					write(it->second->get_fd(), tmp.c_str(), tmp.size());
-					it_param = command.parameters.begin();
-					ite_param = command.parameters.end();
-					for (; it_param != ite_param; it_param++)
-					{
-						write(it->second->get_fd(), it_param->c_str(), it_param->size());
-						write(it->second->get_fd(), "\n", 1);
-					}
-					tmp = "last parameter:\n";
-					write(it->second->get_fd(), tmp.c_str(), tmp.size());
-					write(it->second->get_fd(), command.last_param.c_str(), command.last_param.size());
-					write(it->second->get_fd(), "\n", 1);
-				}
-			}
-		}
+		// 	tmp = "User " + int_to_string(data.users.at(user_fd)->get_id()) + ":\nprefix:";
+		// 	cout << tmp << endl;
+		// 	if (command.prefix.empty() == false)
+		// 	{
+		// 		cout << command.prefix << endl;
+		// 	}
+		// 	tmp = "command:";
+		// 	cout << tmp << endl;
+		// 	cout << command.command << endl;
+		// 	tmp = "parameters:";
+		// 	cout << tmp  << endl;
+		// 	for (; it_param != ite_param; it_param++)
+		// 	{
+		// 		cout << *it_param << endl;
+		// 	}
+		// 	tmp = "last parameter:";
+		// 	cout << tmp << endl;
+		// 	cout << command.last_param << endl;
+		// 	for (; it != ite; it++)
+		// 	{
+		// 		if (it->second->get_fd() != user_fd)
+		// 		{
+		// 			tmp = "User " + int_to_string(data.users.at(user_fd)->get_id()) + ":\nprefix:\n";
+		// 			write(it->second->get_fd(), tmp.c_str(), tmp.size());
+		// 			if (command.prefix.empty() == false)
+		// 			{
+		// 				write(it->second->get_fd(), command.prefix.c_str(), command.prefix.size());
+		// 			}
+		// 			write(it->second->get_fd(), "\n", 1);
+		// 			tmp = "command:\n";
+		// 			write(it->second->get_fd(), tmp.c_str(), tmp.size());
+		// 			write(it->second->get_fd(), command.command.c_str(), command.command.size());
+		// 			write(it->second->get_fd(), "\n", 1);
+		// 			tmp = "parameters:\n";
+		// 			write(it->second->get_fd(), tmp.c_str(), tmp.size());
+		// 			it_param = command.parameters.begin();
+		// 			ite_param = command.parameters.end();
+		// 			for (; it_param != ite_param; it_param++)
+		// 			{
+		// 				write(it->second->get_fd(), it_param->c_str(), it_param->size());
+		// 				write(it->second->get_fd(), "\n", 1);
+		// 			}
+		// 			tmp = "last parameter:\n";
+		// 			write(it->second->get_fd(), tmp.c_str(), tmp.size());
+		// 			write(it->second->get_fd(), command.last_param.c_str(), command.last_param.size());
+		// 			write(it->second->get_fd(), "\n", 1);
+		// 		}
+		// 	}
+		// }
 		if (raw_input.size() >= current.size() + 1)
 			raw_input = raw_input.substr(current.size() + 1, raw_input.size());
 		else
@@ -227,6 +228,7 @@ void	server_actions(t_data &data, int i)
 {
 	const int user_fd = find_user_fd(data.epoll.events[i].data.fd, data);
 
+	cout << "Server_actions()" << endl;
 	if (data.epoll.events[i].data.fd == data.socket.fd)			//Check if the user 
 		user_connection(data);									//Connect a user
 	if ((data.epoll.events[i].events & EPOLLERR)
