@@ -77,6 +77,25 @@ bool    User::is_operator(void)
     return false;
 }
 
+bool	User::remove_channel(string channel_name)
+{
+    vector<Channel *>::iterator beg;
+    vector<Channel *>::iterator end;
+
+    beg = _channels.begin();
+    end = _channels.end();
+    while (beg != end)
+    {
+        if ((*beg)->get_name() == channel_name)
+        {
+            _channels.erase(beg);
+            return true;
+        }
+        beg++;
+    }
+    return false;
+}
+
 
 /*
 				GETTERS

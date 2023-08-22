@@ -54,15 +54,15 @@ bool	User::command_JOIN(t_command &command)
     if (channel)
 	{
 		if (channel->get_invite_only() == true) {
-			send_message(ERR_INVITEONLYCHAN(_nick, channel_name));
+			send_message(ERR_INVITEONLYCHAN(channel_name));
 			return false;
 		}
 		if (channel->get_has_user_limit() == true && channel->get_user_limit() == channel->get_users().size()) {
-			send_message(ERR_CHANNELISFULL(_nick, channel_name));
+			send_message(ERR_CHANNELISFULL(channel_name));
 			return (false);
 		}
 		if (channel->get_channel_locked() == true && channel->get_key() != channel_key) {
-			send_message(ERR_BADCHANNELKEY(_nick, channel_name));
+			send_message(ERR_BADCHANNELKEY(channel_name));
 			return false;
 		}
 		if (channel->is_user(_fd) == true)
@@ -74,11 +74,11 @@ bool	User::command_JOIN(t_command &command)
 		channel = new Channel(channel_name, _fd);
 		send_message(CREATEDCHANNEL(channel_name));
 		g_data_ptr->channels[channel_name] = channel;
-		// channel->broadcast(JOIN(_nick, _user, "localhost", channel_name), _fd);
 	}
-	channel->broadcast(JOIN(_nick, _user, "localhost",  channel_name), _fd);
-	if (channel->get_topic_set() == true)
-		send_message(RPL_TOPIC(_nick, _user, _name, channel_name, channel->get_topic()));
+	channel->broadcast(JOIN(_nick, _user, "localhost",  channel_name), -1);
+	if (channel->get_topic_set() == true) {
+		send_message(RPL_TOPIC(_nick, _user, "localhost", channel_name, channel->get_topic()));
+	}
 	channel->print_names(_fd);
 	_channels.push_back(channel);
 	return true;
@@ -99,94 +99,65 @@ bool	User::command_TOPIC(t_command &command)
 	/*  ********************************************************************* */
 							/*	General checks	*/
 	/*  ********************************************************************* */
-
-	if (_is_identified == false) {
+	if (_is_identified == false)
+	{
         if (_has_nick == 1) {
     		send_message(ERR_NOPRIVILEGES(_nick));
         } else {
             send_message(ERR_NOPRIVILEGES(int_to_string(_id)));
         }
     	return false;
-	}
-	if (command.parameters.size() == 0)
-	{
+	} else if (command.parameters.size() == 0) {
 		send_message(ERR_NEEDMOREPARAMS(_nick, "TOPIC"));
 		return false;
 	}
-	string channel_name = command.parameters.front();
-	if (_channels.empty() == true)
-	{
-		send_message(ERR_NOTONCHANNEL(channel_name));
-		return false;
-	}
-	t_channels::iterator it = g_data_ptr->channels.find(channel_name);
-	if (it == g_data_ptr->channels.end())
-	{
+
+
+	/*  ********************************************************************* */
+						/*	Get user information	*/
+	/*  ********************************************************************* */
+	string	channel_name = command.parameters.front();
+	Channel	*channel = Channel::getChannel(channel_name);
+
+	if (channel == NULL) {
 		send_message(ERR_NOSUCHCHANNEL(_nick, channel_name));
 		return false;
+	} else if (channel->is_user(_fd) == false) {
+		send_message(ERR_NOTONCHANNEL(channel_name, _nick));
+		return false;
 	}
-	Channel *channel = it->second;
-
-	/*TODO	If not in channel	*/
-
-		/*	ERR_NOTONCHANNEL	*/
-		/*	QUIT	*/
 
 
 	/*  ********************************************************************* */
 							/*	Reading the topic	*/
 	/*  ********************************************************************* */
-
 	if (command.has_last_param == false)
 	{
-		if (channel->get_topic_set() == false)
-		{
-			send_message(RPL_NOTOPIC(_nick, _user, _name, channel_name));
-			return false;
+		if (channel->get_topic_set() == false) {
+			send_message(RPL_NOTOPIC(_nick, _user, "localhost", channel_name));
+		} else {
+			send_message(RPL_TOPIC(_nick, _user, "localhost", channel_name, channel->get_topic()));
 		}
-		else
-		{
-			send_message(RPL_TOPIC(_nick, _user, _name, channel_name, channel->get_topic()));
-			return true;
-		}
+		return true;
 	}
-	/*	If <topic>	not given	*/
-		/*	if topic not set in channel	*/
-			/*	RPL_NOTOPIC	*/
 
-		/*	else	*/
-			/*	RPL_TOPIC	*/
-			/*	RPL_TOPICWHOTIME	*/ 
-				// The info about who and at what time set the topic
-		/*	QUIT	*/
-	
 
 	/*  ********************************************************************* */
 							/*	Write the topic	*/
 	/*  ********************************************************************* */
 
-	else if (channel->get_topic_protected() == true && channel->is_op(_fd) == false)
-	{
-		send_message(ERR_CHANOPRIVSNEEDED(channel_name));
+
+	if (channel->get_topic_protected() == true && channel->is_op(_fd) == false) {
+		send_message(ERR_CHANOPRIVSNEEDED(user_id(_nick, _user, "localhost"), channel_name));
 		return false;
 	}
-	else if (command.last_param.empty() == true)
-	{
-		channel->set_topic("");
-		return true;
+	if (command.last_param.size() <= 1) {
+		channel->unset_topic();
+		channel->broadcast(RPL_TOPIC2(_nick, _user, "localhost", channel_name, ""), -1);
+	} else {
+		channel->set_topic(command.last_param);
+		channel->broadcast(RPL_TOPIC2(_nick, _user, "localhost", channel_name, command.last_param), -1);
 	}
-	channel->set_topic(command.last_param);
-	channel->broadcast(g_data_ptr->users.at(_fd)->get_nick() + " has changed topic to " + command.last_param, _fd);
-	/*	If protected mode and no permission	*/
-		/*	ERR_CHANOPRIVSNEEDED	*/
-		/*	QUIT	*/
-	
-	/*	If <topic> is an empty string */
-		/*	Clear the channel topic	*/
-		/*	QUIT	*/
-	
-	/*	Change the topic	*/
-	/*	Broadcast message that you changed the topic	*/
 	return true;
 }
 
@@ -222,7 +193,7 @@ bool	User::command_names(t_command &command)
 	}
 	if (target_channel->is_user(_fd) == false)
 	{
-		send_message(ERR_NOTONCHANNEL(target_channel->get_name()));
+		send_message(ERR_NOTONCHANNEL(target_channel->get_name(), _nick));
 		return false;
 	}
 	target_channel->print_names(_fd);
@@ -295,7 +266,7 @@ bool	User::command_INVITE(t_command &command)
 		/*	EXIT	*/
 	if (channel->is_user(_fd) == false)
 	{
-		send_message(ERR_NOTONCHANNEL(channel_name));
+		send_message(ERR_NOTONCHANNEL(channel_name, _nick));
 		return false;
 	}
 	/*	If the mode is invite only and user not operator	*/
@@ -303,7 +274,7 @@ bool	User::command_INVITE(t_command &command)
 		/*	EXIT	*/
 	if (channel->get_invite_only() == true && channel->is_op(_fd) == false)
 	{
-		send_message(ERR_CHANOPRIVSNEEDED(channel_name));
+		send_message(ERR_CHANOPRIVSNEEDED(user_id(_nick, _user, "localhost"), channel_name));
 		return false;	
 	}
 	/*	If user is on channel	*/
@@ -356,7 +327,7 @@ bool	User::command_PART(t_command &command)
 
 		/*	If channel doesn't exist  */
 			/*	ERR_NOSUCHCHANNEL	*/
-	string	channel_name = command.parameters.at(0); 
+	string	channel_name = command.parameters.front(); 
 	Channel	*channel = Channel::getChannel(channel_name);
 	
 	if (channel == NULL) {
@@ -364,13 +335,12 @@ bool	User::command_PART(t_command &command)
 		return false;
 	}
 	if (channel->is_user(_fd) == false) {
-		send_message(ERR_NOTONCHANNEL(channel_name));
+		send_message(ERR_NOTONCHANNEL(channel_name, _nick));
 		return false;
 	}
 	/*	If OK	*/
 		/*	Notify everybody that client quitted the channel  */
 	if (command.has_last_param == false) {
-		// cout << "I was in WREASON! " << PART_WOREASON(_nick, _user, "localhost", channel_name) << endl;
 		channel->broadcast(PART_WOREASON(_nick, _user, "localhost", channel_name), -1);
 	} else {
 		// cout << "I was in WREASON! " << PART_WREASON(_nick, _user, "localhost", channel_name, command.last_param) << endl;
@@ -397,8 +367,9 @@ bool	User::command_PART(t_command &command)
  */
 bool	User::command_KICK(t_command &command)
 {
-	/*	Basic tests	*/
-		/*	Not authorized	*/
+	/*	********************************************************************* */
+								/*	Basic tests	*/
+	/*	********************************************************************* */
 	if (_is_identified == false) {
         if (_has_nick == 1) {
     		send_message(ERR_NOPRIVILEGES(_nick));
@@ -407,84 +378,57 @@ bool	User::command_KICK(t_command &command)
         }
     	return false;
 	}
-		/*	Need more params	*/	// <comment> can be empty or don't exist
-	if (command.parameters.size() != 2)
-	{
+	if (command.parameters.size() < 2) {
 		send_message(ERR_NEEDMOREPARAMS(_nick, "KICK"));
 		return false;
 	}
-	/*	If channel doesn't exist	*/
-		/*	ERR_NOSUCHCHANNEL	*/
-		/*	exit  */
-	string channel_name = command.parameters.at(0);
-	t_channels::iterator it_channels = g_data_ptr->channels.find(channel_name);
-	if (it_channels == g_data_ptr->channels.end())
-	{
+
+	/*	********************************************************************* */
+				/*	Get the information from the user	*/
+	/*	********************************************************************* */
+	string	channel_name = command.parameters.at(0);
+	string	target_name	= command.parameters.at(1);
+	Channel	*channel = Channel::getChannel(channel_name);
+	User	*target_user = User::getUser(target_name, server);
+
+	if (channel == NULL) {
 		send_message(ERR_NOSUCHCHANNEL(_nick, channel_name));
 		return false;
 	}
-	Channel *channel = it_channels->second;
-	/*	If the target user doesn't exist	*/
-		/*	CUSTOM_MESSAGE	*/
-		/*	exit	*/
-	t_users::iterator it_users = g_data_ptr->users.begin();	
-	t_users::iterator ite_users = g_data_ptr->users.end();	
-	for (; it_users != ite_users; it_users++)
-	{
-		if (it_users->second->get_nick() == command.parameters.at(1))
-			break; 
-	}
-	if (it_users == ite_users)
-	{
+	if (target_user == NULL) {
 		send_message(ERR_NOSUCHNICKCHANNEL(command.parameters.at(1)));
 		return false;
 	}
-	User *kick_user = it_users->second;
+	if (channel->is_user(_fd) == false) {
+		send_message(ERR_NOTONCHANNEL(channel_name, _nick));
+		return false;
+	}
+	if (channel->is_op(_fd) == false) {
+		send_message(ERR_CHANOPRIVSNEEDED(user_id(_nick, _user, "localhost"), channel_name));
+		return false;
+	}
+	if (channel->is_user(target_user->get_fd()) == false) {
+		send_message(ERR_USERNOTINCHANNEL(target_user->get_nick(), channel_name));
+		return false;
+	}
+	
+	/*	********************************************************************* */
+					/*	Kick the user from the channel	*/
+	/*	********************************************************************* */
 
-	/*	If the user not in the channel	*/
-		/*	ERR_NOTONCHANNEL	*/
-		/*	Exit	*/
-	if (channel->is_user(_fd) == false)
-	{
-		send_message(ERR_NOTONCHANNEL(channel_name));
-		return false;
+	if (command.has_last_param == true) {
+		channel->broadcast(RPL_KICK2(user_id(_nick, _user, "localhost"), channel_name, target_name, command.last_param), -1);
+	} else {
+		channel->broadcast(RPL_KICK2(user_id(_nick, _user, "localhost"), channel_name, target_name, "Don't like your name"), -1);
 	}
-	/*	If no permission	*/
-		/*	ERR_CHANOPRIVSNEEDED */
-		/*	Exit	*/
-	if (channel->is_op(_fd) == false)
-	{
-		send_message(ERR_CHANOPRIVSNEEDED(channel_name));
-		return false;
-	}
-	/*	If the target user not in Channel	*/
-		/*	ERR_USERNOTINCHANNEL */
-		/*	Exit	*/
-	if (channel->is_user(kick_user->get_fd()) == false)
-	{
-		send_message(ERR_USERNOTINCHANNEL(kick_user->get_nick(), channel_name));
-		return false;
-	}
-	/*	Channel::kick_user()	*/
-	channel->kick_user(kick_user->get_fd());
-	/* Send message to kicked user and to channel */
-	string message;
-	if (command.has_last_param == true)
-	{
-		message = "You have been kicked of the channel " + channel_name + ": " + command.last_param;	
-		channel->broadcast(kick_user->get_nick() + " has been kicked of the channel " + channel_name + ": " + command.last_param, _fd);
-	}
-	else
-	{
-		message = "You have been kicked of the channel " + channel_name + ".";
-		channel->broadcast(kick_user->get_nick() + " has been kicked of the channel.", _fd);
-	}
-	write(kick_user->get_fd(), message.c_str(), message.size());
+	channel->kick_user(target_user->get_fd());
+	target_user->remove_channel(channel_name);
 
 	//If channel empty, remove Channel
 	if (channel->get_users().empty() == true)
 	{
-		g_data_ptr->channels.erase(channel->get_name());
+		// g_data_ptr->channels.erase(find(g_data_ptr->channels.begin(), g_data_ptr->channels.end(), channel->get_name()));
+		_channels.erase(find(_channels.begin(), _channels.end(), channel));
 		delete channel;
 	}
 	return true;
@@ -502,21 +446,21 @@ bool	User::command_MODE(t_command &command)
 {
 	/*	Basic tests	*/
 		/*	If not authenticated	*/
-	if (_is_identified == false) {
+	if (_is_identified == false)		// Not identified
+	{
         if (_has_nick == 1) {
     		send_message(ERR_NOPRIVILEGES(_nick));
         } else {
             send_message(ERR_NOPRIVILEGES(int_to_string(_id)));
         }
     	return false;
-	}
-		/*	If not enough parameters	*/
-	if (command.parameters.size() < 1)
+	} 
+	else if (command.parameters.size() < 1)			// Bad num of params
 	{
 		send_message(ERR_NEEDMOREPARAMS(_nick, "MODE"));
 		return false;
-	}
-	if (command.parameters.size() == 1)
+	} 
+	else if (command.parameters.size() == 1)		// specific command
 	{
 		string	myBeautifulString;
 
@@ -526,208 +470,166 @@ bool	User::command_MODE(t_command &command)
 			Channel *smartChannel;
 
 			smartChannel = Channel::getChannel(myBeautifulString);
-			if (smartChannel == NULL)
-			{
+			if (smartChannel == NULL) {
 				send_message(ERR_NOSUCHCHANNEL(_nick, command.parameters.front()));
 				return false;
 			}
 			send_message(RPL_CHANNELMODEIS(_nick, smartChannel->get_name()));
-			return true;
 		}
 		else
 		{
 			User	*sportyUser;
 
 			sportyUser = User::getUser(myBeautifulString, g_data_ptr);
-			if (sportyUser == NULL)
-			{
+			if (sportyUser == NULL) {
 				send_message(ERR_NOSUCHNICKCHANNEL(myBeautifulString));
 				return false;
 			}
 			send_message(RPL_UMODEIS(myBeautifulString));
-			return true;
 		}
+		return true;
 	}
 	if (command.parameters.front()[0] != '#')
 		return true;
 
-	// I added this, because the +i commands takes a nickname and not a channelname as a first paramater, yes 
-
-	/*	If channel doesn't exist	*/
-		/*	ERR_NOSUCHCHANNEL	*/
-		/*	Exit	*/
-	string channel_name = command.parameters.at(0);
-	t_channels::iterator it_channels = g_data_ptr->channels.find(channel_name);
-	if (it_channels == g_data_ptr->channels.end())
-	{
+	/*	********************************************************************* */
+							/*	Get user information	*/
+	/*	********************************************************************* */
+	string	channel_name;
+	Channel	*channel;
+	
+	channel_name = command.parameters.front();
+	channel = Channel::getChannel(channel_name);
+	if (channel == NULL) {
 		send_message(ERR_NOSUCHCHANNEL(_nick, channel_name));
 		return false;
 	}
-	Channel *channel = it_channels->second;
-	/*	Check if the emitter is OP */
-	if (channel->is_op(_fd) == false)
-	{
+	if (channel->is_op(_fd) == false) {
 		send_message(ERR_NOPRIVILEGES(_nick));
 		return false;
 	}
-	/* Identifying the MODE requested */
-	string mode = command.parameters.at(1);
-	if (mode == "+i")
-	{
+
+	/*	********************************************************************* */
+							/*	Work with modes	*/
+	/*	********************************************************************* */
+	string mode;
+	
+	mode = command.parameters.at(1);
+	if (mode == "+i") {
 		channel->set_invite_only(true);
-		channel->broadcast(channel_name + ": is now invite-only.", _fd);
+		channel->broadcast(MODE2(user_id(_nick, _user, "localhost"), channel_name, "+i", "is now invite-only."), -1);
 	}
-	else if (mode == "-i")
-	{
+	else if (mode == "-i") {
 		channel->set_invite_only(false);
-		channel->broadcast(channel_name + ": is no longer invite-only.", _fd);
+		channel->broadcast(MODE2(user_id(_nick, _user, "localhost"), channel_name, "-i", "is no longer invite-only."), -1);
 	}
-	else if (mode == "+t")
-	{
+	else if (mode == "+t") {
 		channel->set_protected_topic(true);
-		channel->broadcast(channel_name + ": topic is now protected.", _fd);
+		channel->broadcast(MODE2(user_id(_nick, _user, "localhost"), channel_name, "+t", "topic is now protected."), -1);
 	}
-	else if (mode == "-t")
-	{
+	else if (mode == "-t") {
 		channel->set_protected_topic(false);
-		channel->broadcast(channel_name + ": topic is no longer protected.", _fd);
+		channel->broadcast(MODE2(user_id(_nick, _user, "localhost"), channel_name, "-t", "topic is no longer protected."), -1);
 	}
 	else if (mode == "+k")
 	{
-		if (command.parameters.size() != 3)
-		{
-			ERR_NEEDMOREPARAMS(_nick, "MODE");
+		if (command.parameters.size() != 3) {
+			send_message(ERR_NEEDMOREPARAMS(_nick, "MODE"));
 			return false;
-		}
-		if (channel->get_channel_locked() == true)
-		{
+		} else if (channel->get_channel_locked() == true) {
 			send_message(ERR_KEYSET(channel_name));
 			return false;
 		}
-		if (command.parameters.at(2).empty())
-		{
-			channel->disable_locked_mode();
-			channel->broadcast(channel_name + ": is no longer locked.", _fd);
-		}
-		else
-		{
+
+		if (command.parameters.at(2).empty()) {
+			return false;
+		} else {
 			channel->enable_locked_mode(command.parameters.at(2));
-			channel->broadcast(channel_name + ": is now locked.", _fd);
+			channel->broadcast(MODE2(user_id(_nick, _user, "localhost"), channel_name, "+k", "is now locked."), -1);
 		}
 	}
 	else if (mode == "-k")
 	{
-		if (command.parameters.size() != 3)
-		{
-			ERR_NEEDMOREPARAMS(_nick, "MODE");
-			return false;
-		}
-		if (channel->get_channel_locked() == true)
-		{
-			send_message(ERR_KEYSET(channel_name));
-			return false;
-		}
-		if (channel->get_key() != command.parameters.at(2))
-		{
-			send_message(ERR_BADCHANNELKEY(_nick, channel_name));
-			return false;
-		}
 		channel->disable_locked_mode();
-		channel->broadcast(channel_name + ": is no longer locked.", _fd);
+		channel->broadcast(MODE2(user_id(_nick, _user, "localhost"), channel_name, "-k", "is no longer locked."), -1);
 	}
 	else if (mode == "+o")
 	{
-		if (command.parameters.size() != 3)
-		{
+		if (command.parameters.size() < 3) {
 			ERR_NEEDMOREPARAMS(_nick, "MODE");
 			return false;
 		}
-		t_users::iterator it_users = g_data_ptr->users.begin();	
-		t_users::iterator ite_users = g_data_ptr->users.end();	
-		for (; it_users != ite_users; it_users++)
-		{
-			if (it_users->second->get_nick() == command.parameters.at(2))
-				break; 
-		}
-		if (it_users == ite_users)
-		{
+
+		string	user_name;
+		User	*user;
+
+		user_name = command.parameters.at(2);
+		user = User::getUser(user_name, server);
+		if (user == NULL) {
 			send_message(ERR_NOSUCHNICKCHANNEL(command.parameters.at(2)));
 			return false;
-		}
-		User *to_op_user = it_users->second;
-		if (channel->is_user(to_op_user->get_fd()) == false)
-		{
-			string message = "Error: " + to_op_user->get_nick() + " isn't a member of the channel " + channel_name + "\r\n";
-			write(_fd, message.c_str(), message.size());
+		} else if (channel->is_user(user->get_fd()) == false) {
+			send_message(ERR_NOTONCHANNEL(channel_name, user->get_nick()));
 			return false;
 		}
-		if (channel->is_op(to_op_user->get_fd()) == false)
-			channel->op_user(to_op_user->get_fd());
-		channel->broadcast(channel_name + ": " + to_op_user->get_nick() + " is now channel operator.", _fd);
+
+		if (channel->is_op(user->get_fd()) == false) {
+			channel->op_user(user->get_fd());
+			channel->broadcast(MODE2(user_id(_nick, _user, "localhost"), channel_name, "+o", user->get_nick() + " is now channel operator."), -1);
+		}
 		return true;
 	}
 	else if (mode == "-o")
 	{
-		if (command.parameters.size() != 3)
-		{
+		if (command.parameters.size() != 3) {
 			ERR_NEEDMOREPARAMS(_nick, "MODE");
 			return false;
 		}
-		t_users::iterator it_users = g_data_ptr->users.begin();	
-		t_users::iterator ite_users = g_data_ptr->users.end();	
-		for (; it_users != ite_users; it_users++)
-		{
-			if (it_users->second->get_nick() == command.parameters.at(2))
-				break; 
-		}
-		if (it_users == ite_users)
-		{
+
+		string	user_name;
+		User	*user;
+
+		user_name = command.parameters.at(2);
+		user = User::getUser(user_name, server);
+		if (user == NULL) {
 			send_message(ERR_NOSUCHNICKCHANNEL(command.parameters.at(2)));
 			return false;
+		} else if (channel->is_user(user->get_fd()) == false) {
+			send_message(ERR_NOTONCHANNEL(channel_name, user->get_nick()));
+			return false;
 		}
-		User *to_deop_user = it_users->second;
-		if (channel->is_op(to_deop_user->get_fd()) == true)
-			channel->deop_user(to_deop_user->get_fd());
-		channel->broadcast(channel_name + ": " + to_deop_user->get_nick() + " is no longer channel operator.", _fd);
+
+		if (channel->is_op(user->get_fd()) == true){
+			channel->deop_user(user->get_fd());
+			channel->broadcast(MODE2(user_id(_nick, _user, "localhost"), channel_name, "-o", user->get_nick() + " is no longer channel operator."), -1);
+		}
 		return true;
 	}
 	else if (mode == "+l")
 	{
-		if (command.parameters.size() != 3)
-		{
-			ERR_NEEDMOREPARAMS(_nick, "MODE");
+		if (command.parameters.size() != 3) {
+			send_message(ERR_NEEDMOREPARAMS(_nick, "MODE"));
 			return false;
 		}
-		int value = atoi(command.parameters.at(2).c_str());
+
+		int value;
+		
+		value = atoi(command.parameters.at(2).c_str());
 		if (value < 1)
 			return false;
 		channel->set_max_users(value);
 		channel->set_has_user_limit(true);
-		channel->broadcast(channel_name + ": is now limited in members " + int_to_string(value) + ".", _fd);
+		channel->broadcast(MODE2(user_id(_nick, _user, "localhost"), channel_name, "+l", "is now limited in members ") + int_to_string(value) + ".", -1);
 	}
 	else if (mode == "-l")
 	{
 		channel->set_has_user_limit(false);
-		channel->broadcast(channel_name + ": is no longer limited in members.", _fd);
+		channel->broadcast(MODE2(user_id(_nick, _user, "localhost"), channel_name, "-l", "is no longer limited in members."), -1);
 	}
 	else
 	{
-		write(_fd, "Unknow mode.\r\n", 15);
+		send_message(ERR_UNKNOWNMODE(mode));
 		return false;
 	}
 	return true;
-
-	//FOR MODE L
-	// if (is_op(fd_emitter) == false)
-	// 	return error_feedback(fd_emitter, "You are not channel operator"); 
-	//	if (max_users < 1)
-	//	return error_feedback(fd_emitter, "Invalid max users number (must be >1)");
-	//	broadcast("#" + this->get_name() + "'s max users is now " + int_to_string(max_users) + " .");
-
-	// if (this->_has_user_limit == false)
-	// broadcast("#" + this->get_name() + " no longer has a user limit.");
-	//TODO IF mode is TRUE, call set_max_users in the command_MODE() functtion
-
-	/*	Just the values	*/
 }
-// /connect localhost 6667 test

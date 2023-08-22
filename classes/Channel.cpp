@@ -62,8 +62,14 @@ bool	Channel::is_op(int fd_user)
 	vector<int>::iterator it = this->_fds_ops.begin();
 	vector<int>::iterator ite = this->_fds_ops.end();
 
-	for (; it != ite; it++)
-	{
+	for (; it != ite; it++) {
+		if (*it == fd_user)
+			return true;
+	}
+
+	it = g_data_ptr->operator_fds.begin();
+	ite = g_data_ptr->operator_fds.end();
+	for (; it != ite; it++) {
 		if (*it == fd_user)
 			return true;
 	}
@@ -116,6 +122,8 @@ void	Channel::add_user(int fd_user)
 void	Channel::kick_user(int fd_to_kick)
 {
 	this->_fds_users.erase(find(this->_fds_users.begin(), this->_fds_users.end(), fd_to_kick));
+	if (is_op(fd_to_kick) == true)
+		this->_fds_ops.erase(find(this->_fds_ops.begin(), this->_fds_ops.end(), fd_to_kick));
 }
 
 void	Channel::part(int fd_user)
@@ -176,10 +184,13 @@ void	Channel::set_invite_only(bool mode)
 void	Channel::set_topic(string topic)
 {
 	this->_is_topic_set = true;
-	if (topic.empty() == true)
-		this->_topic.clear();
-	else
-		this->_topic = topic;
+	this->_topic = topic;
+}
+
+void	Channel::unset_topic()
+{
+	this->_is_topic_set = false;
+	this->_topic = "";
 }
 
 void	Channel::set_protected_topic(bool mode)
@@ -215,11 +226,13 @@ void	Channel::broadcast(string message, int fd_emitter)
 	vector<int>::iterator ite = this->_fds_users.end();
 
 	message += "\r\n";
-	for (; it != ite; it++)
+	while (it != ite)
 	{
-		if (fd_emitter != -1 && *it != fd_emitter) {
+		if (fd_emitter == -1 || *it != fd_emitter) {
+			// cout << "I was here with" << *it << " fd" << endl; 
 			write(*it, message.c_str(), message.size());
 		}
+		it++;
 	}
 }
 
@@ -279,7 +292,7 @@ vector<int>		Channel::get_ops(void) const {return this->_fds_ops;};
 vector<int>		Channel::get_invited(void) const {return this->_fds_invited;};
 bool			Channel::get_invite_only(void) const {return this->_is_invite_only;};
 string			Channel::get_topic(void) const {return this->_topic;}
-bool			Channel::get_topic_set(void) const {return this->_is_topic_set ;};
+bool			Channel::get_topic_set(void) const {return this->_is_topic_set;};
 bool			Channel::get_topic_protected(void) const {return this->_is_topic_protected ;};
 string			Channel::get_key(void) const {return this->_key ;};
 bool			Channel::get_channel_locked(void) const {return this->_is_channel_locked ;};

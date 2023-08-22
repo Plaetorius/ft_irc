@@ -114,7 +114,7 @@ bool	User::command_NICK(t_command &command)
         {
             User    *user = g_data_ptr->users[g_data_ptr->open_fds[i]];
             if (user->get_identification() == true)
-                user->send_message(CHANGE_NICKNAME(_nick, _user, "localhost", param));
+                user->send_message(NICK(_nick, _user, "localhost", param));
         }
     }
 
@@ -274,7 +274,6 @@ int		User::command_KILL(t_command &command)
 {
     User    *target_user;
     string  target_nick;
-    bool    has_reason;
 
     /*	********************************************************************* */
                                 /*  Basic tests */
@@ -305,10 +304,6 @@ int		User::command_KILL(t_command &command)
         send_message(ERR_NOSUCHNICKCHANNEL(target_nick));
         return -1;
     }
-    if (command.last_param.size() == 0)
-        has_reason = 0;
-    else
-        has_reason = 1;
 
     /*	********************************************************************* */
             /*  Go through the channels and remove the target user  */
@@ -320,16 +315,15 @@ int		User::command_KILL(t_command &command)
         Channel *myChannel = *iter_beg;
 
         myChannel->kick_user(target_user->get_fd());
+        target_user->remove_channel(myChannel->get_name());
         if (myChannel->get_users().size() != 0)
         {
-            if (has_reason == 1)
-                myChannel->broadcast(QUIT_WREASON(target_nick, command.last_param), _fd);
-            else
-                myChannel->broadcast(QUIT_WOREASON(target_nick), _fd);
-        }
-        else    // No more users left in the channel
-        {
-            this->_channels.erase(iter_beg);
+            if (command.has_last_param == 1) {
+                myChannel->broadcast(QUIT2(user_id(target_nick, target_user->get_user(), "localhost"), command.last_param), -1);
+            } else {
+                myChannel->broadcast(QUIT2(user_id(target_nick, target_user->get_user(), "localhost"), "default reason"), -1);
+            }
+        } else {   // No more users left in the channel
             this->server->channels.erase(myChannel->get_name());
             delete myChannel;
         }
@@ -339,12 +333,11 @@ int		User::command_KILL(t_command &command)
     /*	********************************************************************* */
                     /*  Notify the user that he was killed  */
     /*	********************************************************************* */
-    if (has_reason == true)
-        target_user->send_message(KILL_WREASON(_nick, command.last_param));
-    else
-        target_user->send_message(KILL_WOREASON(_nick));
-
-    // this->server->open_fds.erase(find(server->open_fds.begin(), server->open_fds.end(), target_user->get_fd()));
+    if (command.has_last_param == true) {
+        target_user->send_message(KILL(_nick, command.last_param));
+    } else {
+        target_user->send_message(KILL(_nick, "default reason"));
+    }
     return (target_user->get_fd());
 }
 
@@ -368,16 +361,16 @@ int     User::command_QUIT(t_command &command)
         Channel *myChannel = *iter_beg;
 
         myChannel->kick_user(_fd);
+        _channels.erase(iter_beg);
         if (myChannel->get_users().size() != 0) // There is someone in the channel
         {
             if (command.last_param.size() != 0)
-                myChannel->broadcast(QUIT_WREASON(_nick, command.last_param), _fd);
+                myChannel->broadcast(QUIT2(user_id(_nick, _user, "localhost"), command.last_param), -1);
             else
-                myChannel->broadcast(QUIT_WOREASON(_nick), _fd);
+                myChannel->broadcast(QUIT2(user_id(_nick, _user, "localhost"), "default reason"), -1);
         }
         else    // No more users left in the channel
         {
-            this->_channels.erase(iter_beg);
             this->server->channels.erase(myChannel->get_name());
             delete myChannel;
         }
@@ -424,7 +417,7 @@ bool	User::command_PRIVMSG(t_command &command)
     /*  if param is channel */
     if (target[0] == '#')
     {
-        Channel *target_channel = Channel::getChannel(target.substr(0));
+        Channel *target_channel = Channel::getChannel(target);
 
         /*  If channel doesn't exist    */ /* Error */
         if (!target_channel) {
@@ -434,7 +427,7 @@ bool	User::command_PRIVMSG(t_command &command)
 
         //  I need to check here if I am in the channel!!!!!!!!!!!!
         if (target_channel->is_user(_fd) == false) {
-            send_message(ERR_NOTONCHANNEL(target));
+            send_message(ERR_NOTONCHANNEL(target, _nick));
             return false;
         }
         target_channel->broadcast(PRIVMSG2(_nick, _user, "localhost", target, command.last_param), _fd);
@@ -485,7 +478,7 @@ bool	User::command_NOTICE(t_command &command)
     /*  if param is channel */
     if (target[0] == '#')
     {
-        Channel *target_channel = Channel::getChannel(target.substr(1));
+        Channel *target_channel = Channel::getChannel(target);
 
         /*  If channel doesn't exist    */ /* Error */
         if (!target_channel) {
