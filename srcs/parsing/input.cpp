@@ -2,7 +2,7 @@
 #include "User.hpp"
 
 
-string	read_raw_input(int	user_fd, t_data &data)
+string	read_raw_input(int	user_fd)
 {
 	string 	res;
 	char	buffer[READ_SIZE + 1];

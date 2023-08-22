@@ -78,7 +78,7 @@ extern t_data	*g_data_ptr;
 /*																		      */
 /******************************************************************************/
 bool		parsing(char **argv, int &port, string &password);
-string		read_raw_input(int	user_fd, t_data &data);
+string		read_raw_input(int	user_fd);
 t_command	parse_raw_input(string raw_input);
 
 /******************************************************************************/

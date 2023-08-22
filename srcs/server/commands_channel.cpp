@@ -53,16 +53,16 @@ bool	User::command_JOIN(t_command &command)
 	/*  ********************************************************************* */
     if (channel)
 	{
-		if (channel->get_invite_only() == true) {
-			send_message(ERR_INVITEONLYCHAN(channel_name));
+		if (channel->get_invite_only() == true && channel->is_invited(_fd) == false) {
+			send_message(ERR_INVITEONLYCHAN(_nick, channel_name)); // user_id(_nick, _user, "localhost"), 
 			return false;
 		}
 		if (channel->get_has_user_limit() == true && channel->get_user_limit() == channel->get_users().size()) {
-			send_message(ERR_CHANNELISFULL(channel_name));
-			return (false);
+			send_message(ERR_CHANNELISFULL(_nick, channel_name));
+			return false;
 		}
 		if (channel->get_channel_locked() == true && channel->get_key() != channel_key) {
-			send_message(ERR_BADCHANNELKEY(channel_name));
+			send_message(ERR_BADCHANNELKEY(_nick, channel_name));
 			return false;
 		}
 		if (channel->is_user(_fd) == true)
@@ -207,7 +207,8 @@ bool	User::command_names(t_command &command)
 /**
  * @brief	invite a user to a channel
  * 
- * @example	INVITE	<nickname> <channel>
+ * @param	INVITE	<nickname> <channel>
+ * 
  * @example		INVITE Wiz #foo_bar    					; Invite Wiz to #foo_bar
  * @example		 :dan-!d@localhost INVITE Wiz #test		; dan- has invited Wiz to the channel #test
  * 
@@ -216,8 +217,9 @@ bool	User::command_names(t_command &command)
  */
 bool	User::command_INVITE(t_command &command)
 {
-	/*	Basic tests	*/
-		/*	If not authenticated	*/
+	/*	********************************************************************* */
+								/*	Basic tests	*/
+	/*	********************************************************************* */
 	if (_is_identified == false) {
         if (_has_nick == 1) {
     		send_message(ERR_NOPRIVILEGES(_nick));
@@ -225,71 +227,48 @@ bool	User::command_INVITE(t_command &command)
             send_message(ERR_NOPRIVILEGES(int_to_string(_id)));
         }
     	return false;
-	}
-		/*	If not enough parameters	*/
-	if (command.parameters.size() != 2)
-	{
+	} else if (command.parameters.size() != 2) {
 		send_message(ERR_NEEDMOREPARAMS(_nick, "INVITE"));
 		return false;
 	}
 
-	/*	If channel doesn't exist	*/
-		/*	ERR_NOSUCHCHANNEL	*/
-		/*	Exit	*/
-	string channel_name = command.parameters.at(1);
-	t_channels::iterator it_channels = g_data_ptr->channels.find(channel_name);
-	if (it_channels == g_data_ptr->channels.end())
-	{
+	/*	********************************************************************* */
+					/*	Get the information about the user	*/
+	/*	********************************************************************* */
+
+	string	channel_name;
+	string	user_name;
+	Channel	*channel;
+	User	*user;
+
+	user_name = command.parameters.at(0);
+	channel_name = command.parameters.at(1);
+	user = User::getUser(user_name, server);
+	channel	= Channel::getChannel(channel_name);
+
+	if (channel == NULL) {
 		send_message(ERR_NOSUCHCHANNEL(_nick, channel_name));
 		return false;
-	}
-	Channel *channel = it_channels->second;
-
-	/*	If target user doesn't exist	*/
-		/*	CUSTOM_MESSAGE	*/
-		/*	EXIT	*/
-	t_users::iterator it_users = g_data_ptr->users.begin();	
-	t_users::iterator ite_users = g_data_ptr->users.end();	
-	for (; it_users != ite_users; it_users++)
-	{
-		if (it_users->second->get_nick() == command.parameters.at(0))
-			break; 
-	}
-	if (it_users == ite_users)
-	{
-		send_message(ERR_NOSUCHNICKCHANNEL(command.parameters.at(0)));
+	} else if (user == NULL) {
+		send_message(ERR_NOSUCHNICKCHANNEL(user_name));
 		return false;
-	}
-	User *invited_user = it_users->second;
-	/*	If the current user not on channel	*/
-		/*	ERR_NOTONCHANNEL	*/
-		/*	EXIT	*/
-	if (channel->is_user(_fd) == false)
-	{
+	} else if (channel->is_user(_fd) == false) {
 		send_message(ERR_NOTONCHANNEL(channel_name, _nick));
 		return false;
-	}
-	/*	If the mode is invite only and user not operator	*/
-		/*	ERR_CHANOPRIVSNEEDED	*/
-		/*	EXIT	*/
-	if (channel->get_invite_only() == true && channel->is_op(_fd) == false)
-	{
+	} else if (channel->get_invite_only() == true && channel->is_op(_fd) == false) {
 		send_message(ERR_CHANOPRIVSNEEDED(user_id(_nick, _user, "localhost"), channel_name));
 		return false;	
-	}
-	/*	If user is on channel	*/
-		/*	ERR_USERONCHANNEL	*/
-		/*	EXIT	*/
-	if (channel->is_user(invited_user->get_fd()) == true)
-	{
-		send_message(ERR_USERONCHANNEL(_nick, invited_user->get_nick(), channel_name));
+	} else if (channel->is_user(user->get_fd()) == true) {
+		send_message(ERR_USERONCHANNEL(_nick, user->get_nick(), channel_name));
 		return false;
 	}
-	/*	Send RPL_INVITING to current user	*/
-	/*	Send INVITE to target user	*/
-	send_message(RPL_INVITING(_nick, _user, _name, invited_user->get_nick(), channel_name));
-	channel->invite_user(invited_user->get_fd());
-	send_message(INVITE(_nick, _user, _name, invited_user->get_nick(), channel_name));
+
+	/*	********************************************************************* */
+							/*	Invite the user	*/
+	/*	********************************************************************* */
+	send_message(RPL_INVITING(user_id(_nick, _user, "localhost"), _nick, user->get_nick(), channel_name));
+	channel->invite_user(user->get_fd());
+	user->send_message(INVITE(user_id(_nick, _user, "localhost"), user->get_nick(), channel_name));
 	return true;
 }
 

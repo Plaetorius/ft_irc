@@ -133,7 +133,7 @@ void	execute_commands(t_command &command, User *user)
 
 static void	user_command(int user_fd, t_data &data)
 {
-	string	raw_input = read_raw_input(user_fd, data);
+	string	raw_input = read_raw_input(user_fd);
 	string	current;
 	t_command command;
 	t_users::iterator it, ite;
