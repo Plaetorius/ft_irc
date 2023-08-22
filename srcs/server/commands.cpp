@@ -114,7 +114,7 @@ bool	User::command_NICK(t_command &command)
         {
             User    *user = g_data_ptr->users[g_data_ptr->open_fds[i]];
             if (user->get_identification() == true)
-                user->send_message(CHANGE_NICKNAME(_nick, _user, "localhost", param));
+                user->send_message(NICK(_nick, _user, "localhost", param));
         }
     }
 
@@ -427,7 +427,7 @@ bool	User::command_PRIVMSG(t_command &command)
 
         //  I need to check here if I am in the channel!!!!!!!!!!!!
         if (target_channel->is_user(_fd) == false) {
-            send_message(ERR_NOTONCHANNEL(target));
+            send_message(ERR_NOTONCHANNEL(target, _nick));
             return false;
         }
         target_channel->broadcast(PRIVMSG2(_nick, _user, "localhost", target, command.last_param), _fd);
