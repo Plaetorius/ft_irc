@@ -18,6 +18,8 @@ string	read_raw_input(int	user_fd, t_data &data)
 	{
 		bzero(buffer, READ_SIZE + 1);
 		len_read = read(user_fd, buffer, READ_SIZE);
+		if (len_read == -1)
+			continue;
 		if (len_read > 0)
 		{
 			buffer[len_read] = '\0';
