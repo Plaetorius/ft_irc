@@ -32,10 +32,15 @@ void	User::push_back_command(t_command &command)
 
 bool    User::send_message(const string &message)
 {
-    if (write(this->_fd, message.c_str(), message.length()) < 1)
+	string truncated = message;
+	
+	if (truncated.size() > 510)
+	{
+		truncated = truncated.substr(0, 510) + "\r\n";
+	}
+    if (write(this->_fd, truncated.c_str(), truncated.length()) < 1)
 		return false;
-
-	cout << "\033[96m" << this->_id << " > " << message << "\033[0m";
+	cout << "\033[1;" << 30 + this->_id % 7 << "m" << this->_id << " > " << truncated << "\033[0m";
 	return true;
 }
 
@@ -105,8 +110,3 @@ int User::get_id(void) const {return this->_id;};
 string User::get_nick(void) const {return this->_nick;};
 string	User::get_user(void) const {return this->_user;};
 bool	User::get_identification(void) const {return this->_is_identified;};
-
-
-//TODO remove ; for debug
-void User::set_id(int id) {this->_id = id;};
-void User::set_fd(int fd) {this->_fd = fd;};

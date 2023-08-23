@@ -193,18 +193,6 @@ bool	User::command_USER(t_command &command)
 bool	User::command_PING(t_command &command)
 {
 	/*	********************************************************************* */
-					/*	Check the number of parameters	*/
-	/*	********************************************************************* */
-	// if (command.parameters.size() == 0) {
-    //     if (_has_nick == 1) {
-    //         send_message(ERR_NEEDMOREPARAMS(_nick, "PING"));
-    //     } else {
-    // 	    send_message(ERR_NEEDMOREPARAMS(int_to_string(_id), "PING"));
-    //     }
-    //     return false;
-	// }
-
-	/*	********************************************************************* */
 						/*	Answer to the request	*/
 	/*	********************************************************************* */
 	if (_is_identified == false) {
@@ -376,7 +364,6 @@ int     User::command_QUIT(t_command &command)
         }
         iter_beg++;
     }
-    // this->server->open_fds.erase(find(server->open_fds.begin(), server->open_fds.end(), _fd));
     return (_fd);
 }
 
@@ -507,7 +494,8 @@ bool	User::command_NOTICE(t_command &command)
 
 bool     User::command_unknown(t_command &command)
 {
-    cout << "Was I here?" << endl;
+	if (command.command == "CAP")
+		return true;
     if (_has_nick)
         send_message(ERR_UNKNOWNCOMMAND(_nick, command.command));
     else

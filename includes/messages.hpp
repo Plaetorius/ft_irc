@@ -12,7 +12,7 @@
 /*  ****************************************************************************** */
 # define    ERR_NEEDMOREPARAMS(client, command) ("461 " + client + " " + command + " :Not enough parameters\r\n")
 # define    ERR_NOPRIVILEGES(nick) ("481 " + nick + " :Permission denied-\r\n")
-# define    ERR_NOSUCHNICKCHANNEL(nick) ("401 " + nick + " : No such nick\r\n")
+# define    ERR_NOSUCHNICKCHANNEL(nick) ("401 " + nick + " :No such nick\r\n")
 /*  Nick    */
 # define    NICK(old_nick, user, host, nick) (":" + old_nick + "!" + user + "@" + host + " NICK " + nick + "\r\n")
 # define    ERR_NONICKNAMEGIVEN(client) (": 431 " + client + " :No nickname given\r\n")

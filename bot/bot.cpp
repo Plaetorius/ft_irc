@@ -15,7 +15,6 @@
 
 t_bot	*g_bot_ptr;
 
-
 static string	random_quoi()
 {
 	vector<string>	options;
@@ -147,7 +146,7 @@ int main(int argc, char *argv[])
 	sigfillset(&sa.sa_mask);					//Blocks the other signals when the handler is called
 	if (sigaction(SIGINT, &sa, NULL) < 0)
 		return (close(bot.fd_socket), error_str("sigaction() error"), EXIT_FAILURE);
-	cout << "Connected to channel " + bot.channel << " and listenning" << endl;
+	cout << "Connected to channel " + bot.channel << " and listening" << endl;
 	srand(time(NULL));
 	if (!run_bot(bot))
 		return (EXIT_FAILURE);

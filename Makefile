@@ -29,7 +29,6 @@ SRCS	=	$(addsuffix .cpp,		\
 				int_to_string		\
 				string_to_int		\
 				trim_spaces			\
-				nick_to_fd			\
 			)))
 CLAS	= 	$(addsuffix .cpp,		\
 			$(addprefix classes/,	\

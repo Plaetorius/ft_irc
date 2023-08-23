@@ -1,5 +1,6 @@
 #include "IRC.hpp"
 #include "User.hpp"
+#include "messages.hpp"
 
 static void	user_connection(t_data &data)
 {
@@ -24,7 +25,8 @@ static void	user_connection(t_data &data)
 	fcntl(fd_new_con, F_SETFL, O_NONBLOCK); //Imposed by the subject
 	if (epoll_ctl(data.epoll.fd, EPOLL_CTL_ADD, fd_new_con, &epoll_event_new_con) < 0)
 		clear_data_exit(data, "epoll_ctl() failed", 1);
-	cout << "User " << user_id++ << " connected :)" << endl; 
+	cout << "\033[1;" << 30 + user_id % 7 << "m" << "User " << user_id << " connected :)" << endl;
+	++user_id;
 }
 
 static void	user_disconnection(t_data &data, int fd)
@@ -58,7 +60,7 @@ static void	user_disconnection(t_data &data, int fd)
 			break;
 		}
 	}
-	cout << "User " << id_disc_user << " disconnected :(" << endl;
+	cout << "\033[1;" << 30 + id_disc_user % 7 << "m" << "User " << id_disc_user << " disconnected :(" << endl;
 }
 
 /*
@@ -72,13 +74,6 @@ void	execute_commands(t_command &command, User *user)
 		user->_commands.pop_front(); 
 		bool    result;
 		int     quit_fd;
-
-		cout << "Command: " << command.command << "\n Parameters: ";
-		for (size_t i = 0; i < command.parameters.size(); i++)
-			cout << command.parameters.at(i) << ", ";
-		if (command.last_param.size() != 0)
-			cout << "'Last:' " << command.last_param;
-		cout << endl << endl;
 
 		if (command.command == "PASS") {
 			if (user->command_PASS(command) == false)
@@ -118,12 +113,7 @@ void	execute_commands(t_command &command, User *user)
 		} else if (command.command == "INVITE") {
 			result = user->command_INVITE(command);
 		} else {
-			// cout << "Je suis pas Dumb!" << endl;
-			// cout << command.command << command.last_param << endl;
-
-			/*	There is ERR_UNKNOW_COMMAND	*/
-			/*	Integrate	*/
-			continue ;
+			user->command_unknown(command);
 		}
 	}
 }
@@ -137,67 +127,10 @@ static void	user_command(int user_fd, t_data &data)
 	vector<string>::iterator it_param, ite_param;
 	string	tmp;
 	
-	cout << "User_command()" << endl;
 	while (raw_input.empty() == false)
 	{
 		current = raw_input.substr(0, raw_input.find_first_of("\n"));
 		command = parse_raw_input(current);
-		// if (DEBUG == true)
-		// {
-		// 	it = data.users.begin();
-		// 	ite = data.users.end();
-		// 	it_param = command.parameters.begin();
-		// 	ite_param = command.parameters.end();
-
-		// 	tmp = "User " + int_to_string(data.users.at(user_fd)->get_id()) + ":\nprefix:";
-		// 	cout << tmp << endl;
-		// 	if (command.prefix.empty() == false)
-		// 	{
-		// 		cout << command.prefix << endl;
-		// 	}
-		// 	tmp = "command:";
-		// 	cout << tmp << endl;
-		// 	cout << command.command << endl;
-		// 	tmp = "parameters:";
-		// 	cout << tmp  << endl;
-		// 	for (; it_param != ite_param; it_param++)
-		// 	{
-		// 		cout << *it_param << endl;
-		// 	}
-		// 	tmp = "last parameter:";
-		// 	cout << tmp << endl;
-		// 	cout << command.last_param << endl;
-		// 	for (; it != ite; it++)
-		// 	{
-		// 		if (it->second->get_fd() != user_fd)
-		// 		{
-		// 			tmp = "User " + int_to_string(data.users.at(user_fd)->get_id()) + ":\nprefix:\n";
-		// 			write(it->second->get_fd(), tmp.c_str(), tmp.size());
-		// 			if (command.prefix.empty() == false)
-		// 			{
-		// 				write(it->second->get_fd(), command.prefix.c_str(), command.prefix.size());
-		// 			}
-		// 			write(it->second->get_fd(), "\n", 1);
-		// 			tmp = "command:\n";
-		// 			write(it->second->get_fd(), tmp.c_str(), tmp.size());
-		// 			write(it->second->get_fd(), command.command.c_str(), command.command.size());
-		// 			write(it->second->get_fd(), "\n", 1);
-		// 			tmp = "parameters:\n";
-		// 			write(it->second->get_fd(), tmp.c_str(), tmp.size());
-		// 			it_param = command.parameters.begin();
-		// 			ite_param = command.parameters.end();
-		// 			for (; it_param != ite_param; it_param++)
-		// 			{
-		// 				write(it->second->get_fd(), it_param->c_str(), it_param->size());
-		// 				write(it->second->get_fd(), "\n", 1);
-		// 			}
-		// 			tmp = "last parameter:\n";
-		// 			write(it->second->get_fd(), tmp.c_str(), tmp.size());
-		// 			write(it->second->get_fd(), command.last_param.c_str(), command.last_param.size());
-		// 			write(it->second->get_fd(), "\n", 1);
-		// 		}
-		// 	}
-		// }
 		if (raw_input.size() >= current.size() + 1)
 			raw_input = raw_input.substr(current.size() + 1, raw_input.size());
 		else
@@ -205,7 +138,7 @@ static void	user_command(int user_fd, t_data &data)
 		data.users[user_fd]->push_back_command(command);
 	}
 	if (command.command.size() == 0) {
-        data.users[user_fd]->send_message("461 Where is my command, frere?!\r\n");
+        data.users[user_fd]->send_message("Where is my command, frere?!\r\n");
         return ;
     }
 	execute_commands(command, data.users[user_fd]);
@@ -225,13 +158,13 @@ void	server_actions(t_data &data, int i)
 {
 	const int user_fd = find_user_fd(data.epoll.events[i].data.fd, data);
 
-	if (data.epoll.events[i].data.fd == data.socket.fd)			//Check if the user 
-		user_connection(data);									//Connect a user
+	if (data.epoll.events[i].data.fd == data.socket.fd)				//Check if the user 
+		user_connection(data);										//Connect a user
 	if ((data.epoll.events[i].events & EPOLLERR)
 		|| (data.epoll.events[i].events & EPOLLHUP)
 		|| (data.epoll.events[i].events & EPOLLRDHUP)
-		|| !(data.epoll.events[i].events & EPOLLIN))			//Check if the user has shutdown the connection
-		user_disconnection(data, data.epoll.events[i].data.fd);	//Disconnect a user
-	else if (user_fd != -1 && data.users[user_fd]->get_id() != -1) 									//Issue a command if the user hasn't been disconnected
+		|| !(data.epoll.events[i].events & EPOLLIN))				//Check if the user has shutdown the connection
+		user_disconnection(data, data.epoll.events[i].data.fd);		//Disconnect a user
+	else if (user_fd != -1 && data.users[user_fd]->get_id() != -1) 	//Issue a command if the user hasn't been disconnected
 		user_command(user_fd, data);
 } 

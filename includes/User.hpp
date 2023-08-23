@@ -71,8 +71,6 @@ class User
 		string	get_nick(void) const;
 		string	get_user(void) const;
 		bool	get_identification(void) const;
-		void	set_id(int id);		//TODO remove ; for debug
-		void	set_fd(int fd);		//TODO remove ; for debug
 		bool    is_operator(void);
 };
 

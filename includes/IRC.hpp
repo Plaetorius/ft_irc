@@ -29,7 +29,6 @@ using namespace std;
 # define MAX_CONNECTIONS 16
 # define LOCAL_HOST "127.0.0.1"
 # define READ_SIZE	512 			//Max message size. 510 "usable characters". 2 last ones MUST be \r\n
-# define DEBUG false
 # define LOGIN "login"
 # define PASSWORD "password"
 
@@ -119,6 +118,5 @@ int			find_user_fd(int fd, t_data &data);
 string		int_to_string(int n);
 int			string_to_int(string &number);
 string		trim_spaces(const string &to_trim);
-int			nick_to_fd(string &nick, t_data &data);
 
 #endif

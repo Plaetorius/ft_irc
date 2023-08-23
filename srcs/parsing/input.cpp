@@ -34,13 +34,6 @@ t_command	parse_raw_input(string raw_input)
 	t_command	result;
 	string		parameter;
 	size_t		ind;
-	// cout << "=======================================================" << endl
-	// << "Raw Input Start " << endl
-	// << "=======================================================" << endl
-	// cout << "What am I doing here?!" << raw_input << endl;
-	// << "=======================================================" << endl
-	// << "Raw Input End" << endl
-	// << "=======================================================" << endl;
 
 	if (raw_input.empty())
 		return result;

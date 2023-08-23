@@ -406,7 +406,6 @@ bool	User::command_KICK(t_command &command)
 	//If channel empty, remove Channel
 	if (channel->get_users().empty() == true)
 	{
-		// g_data_ptr->channels.erase(find(g_data_ptr->channels.begin(), g_data_ptr->channels.end(), channel->get_name()));
 		_channels.erase(find(_channels.begin(), _channels.end(), channel));
 		delete channel;
 	}

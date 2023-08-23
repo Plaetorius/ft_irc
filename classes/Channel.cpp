@@ -103,19 +103,8 @@ bool	Channel::is_invited(int fd_user)
 
 void	Channel::add_user(int fd_user)
 {
-	// if (this->_is_invite_only == true && is_invited(fd_user) == false)
-	// 	return error_feedback(fd_user, "You must be invited to join this channel"); //User not invited && channel is invite-only
-	// if (this->_max_users <= this->_fds_users.size())
-	// 	return error_feedback(fd_user, "This channel is already full");
-	// if (key != this->_key)
-	// 	return error_feedback(fd_user, "Wrong password");
-	// if (this->_is_invite_only == true)
-	// 	this->_fds_invited.erase(find(this->_fds_invited.begin(), this->_fds_invited.end(), fd_user));
-
-	//USEFULE FOR JOIN ^^^^^^^^
 	if (this->_fds_users.empty())
 		this->_fds_ops.push_back(fd_user);
-	// cout << "^^^^^^^^^^^^^^^^^ADD USER^^^^^^^^^^^^^^^^^^^^^^" << endl;
 	this->_fds_users.push_back(fd_user);
 }
 
@@ -227,15 +216,16 @@ void	Channel::broadcast(string message, int fd_emitter)
 	vector<int>::iterator it = this->_fds_users.begin();
 	vector<int>::iterator ite = this->_fds_users.end();
 
+	if (message.size() > 510)
+		message = message.substr(0, 510);
 	message += "\r\n";
 	while (it != ite)
 	{
-		if (fd_emitter == -1 || *it != fd_emitter) {
-			// cout << "I was here with" << *it << " fd" << endl; 
+		if (fd_emitter == -1 || *it != fd_emitter)
 			write(*it, message.c_str(), message.size());
-		}
 		it++;
 	}
+	message.clear();
 }
 
 void	Channel::print_names(int target_fd)
