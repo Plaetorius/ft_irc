@@ -47,8 +47,8 @@ MAIN_OBJ = srcs/main.o
 BOT_OBJ  = bot/bot.o
 OBJS    = ${SRCS:.cpp=.o} ${CLAS:.cpp=.o}
 BOBJS   = ${BONUS:.cpp=.o} ${CLAS:.cpp=.o}
-DEPS    = ${OBJS:.o=.d}
-BDEPS   = ${BOBJS:.o=.d}
+DEPS    = ${OBJS:.o=.d} ${MAIN_OBJ:.o=.d}
+BDEPS   = ${BOBJS:.o=.d} ${BOT_OBJ:.o=.d}
 RM		:= rm -rf
 RED		:= \033[1;31m
 NC		:= \033[0m
@@ -83,11 +83,11 @@ re: fclean all
 
 bonus_clean:
 	@echo "${CYAN}Cleaned Tosser${NC}"
-	@${RM} ${BOBJS} ${BOT_OBJ} ${DEPS}
+	@${RM} ${BOBJS} ${BOT_OBJ} ${BDEPS}
 
 bonus_fclean:
 	@echo "${CYAN}Cleaned Tosser${NC}"
-	@${RM} ${BOBJS} tosser ${BOT_OBJ} ${DEPS}
+	@${RM} ${BOBJS} tosser ${BOT_OBJ} ${BDEPS}
 
 bonus_re: bonus_fclean bonus
 
