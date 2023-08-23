@@ -2,7 +2,7 @@ NAME     = ircserv
 CC       = c++
 DEP_FLAG = -MMD
 C98      = -std=c++98
-FLAGS    = -Wall -Wextra ${C98} ${DEP_FLAG} -g3
+FLAGS    = -Wall -Wextra -Werror ${C98} ${DEP_FLAG} -g3
 INCL     = -I includes
 SRCS	=	$(addsuffix .cpp,		\
 			$(addprefix srcs/,		\

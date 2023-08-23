@@ -66,8 +66,6 @@ static void	user_disconnection(t_data &data, int fd)
 */
 void	execute_commands(t_command &command, User *user)
 {
-	// cout << "============================================" << endl << "Start execute commands" << endl <<  "============================================" << endl;
-
 	while (user->_commands.empty() == false)
 	{
 		command = user->_commands.front();
@@ -128,7 +126,6 @@ void	execute_commands(t_command &command, User *user)
 			continue ;
 		}
 	}
-	// cout << "============================================" << endl << "End execute commands" << endl <<  "============================================" << endl;
 }
 
 static void	user_command(int user_fd, t_data &data)
@@ -228,7 +225,6 @@ void	server_actions(t_data &data, int i)
 {
 	const int user_fd = find_user_fd(data.epoll.events[i].data.fd, data);
 
-	cout << "Server_actions()" << endl;
 	if (data.epoll.events[i].data.fd == data.socket.fd)			//Check if the user 
 		user_connection(data);									//Connect a user
 	if ((data.epoll.events[i].events & EPOLLERR)
