@@ -5,7 +5,7 @@ IRC server following Internet RFC standards using C++. The project involved impl
 > Predecessor of Discord in short :)
 
 <img src="./static/diagram.png" width="50%" height="50%">
----
+
 
 ## Handled commands
 
