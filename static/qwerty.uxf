@@ -1,0 +1,40 @@
+<diagram program="umletino" version="15.1"><zoom_level>9</zoom_level><element><id>UMLClass</id><coordinates><x>135</x><y>45</y><w>351</w><h>189</h></coordinates><panel_attributes>Server
+--
+- users: vector&lt;User&gt;
+- channels: vector &lt;Channels&gt;
+- socket: t_socket
+- ...
+--
++ user_connection(): bool
++ user_disconnectiion(): bool
++ user_command(): bool
+--
+Responsibilities
+-- Fully imitate the IRC server
+-- Everything except connecting 
+with other server</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>81</x><y>261</y><w>189</w><h>171</h></coordinates><panel_attributes>User
+--
+- id: int
+- channels: vector&lt;Channel&gt;
+- server: *Server
+--
++ command_PASS(): bool
++ command_JOIN(): bool
++ command_PRIVMSG(): bool
++ ...
+--
+Responsibilities
+-- Imitate the connected user</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>360</x><y>261</y><w>189</w><h>171</h></coordinates><panel_attributes>Channel
+--
+- id: int
+- users: vector&lt;User&gt;
+- banned: vector&lt;User&gt;
+- ...
+--
++ add_user(): bool
++ kick_user(): bool
++ op_user(): bool
++ ...
+--
+Responsibilities
+-- Imitate the channel</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>90</x><y>81</y><w>63</w><h>198</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;200;10;10;50;10</additional_attributes></element><element><id>Relation</id><coordinates><x>477</x><y>81</y><w>54</w><h>198</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>40;200;40;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>261</x><y>279</y><w>117</w><h>27</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;110;10</additional_attributes></element><element><id>Relation</id><coordinates><x>261</x><y>288</y><w>117</w><h>27</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>110;10;10;10</additional_attributes></element></diagram>
